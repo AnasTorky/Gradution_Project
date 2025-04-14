@@ -8,13 +8,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\VideoController;
+use App\Models\Activity;
 use GuzzleHttp\Psr7\Request;
 use Symfony\Component\HttpKernel\DependencyInjection\RegisterControllerArgumentLocatorsPass;
 
 Route::view("/", "home")->name('home');
 
 Route::middleware(["auth"])->group(function () {
-    Route::view('/activities', "activities");
+    // Route::view('/activities', "activities");
     Route::view('/about', "about");
     Route::view("/contact","contact");
 
@@ -35,11 +37,41 @@ Route::middleware(['auth',\App\Http\Middleware\Admin::class])->group(function ()
 });
 
 Route::get('/register',[RegisterController::class,'create'])->name('register');
-Route::post('/register',[RegisterController::class,'store']);
+Route::post('/register',[RegisterController::class,'store'])->name('register.store');
 
 Route::get('/login', [LoginController::class, 'create'])->name('login');
 Route::post('/login', [LoginController::class, 'store']);
 Route::post('/logout',[LoginController::class,'destroy']);
+
+// upload video
+Route::middleware('auth')->group(function () {
+    Route::get('/upload-video', [VideoController::class, 'create'])->name('video.upload');
+    Route::post('/upload-video', [VideoController::class, 'store'])->name('video.store');
+});
+
+
+//show all activities
+Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
+//show one
+Route::get('/activities/{id}', function ($id) {
+    $activity = Activity::findOrFail($id);
+    return view('activities.show', compact('activity'));
+})->name('activities.show');
+// admin activities
+// Route::middleware(['auth', \App\Http\Middleware\Admin::class])->group(function () {
+//     Route::get('/activities/add', [ActivityController::class, 'create'])->name('activities.create');
+//     Route::post('/activities/store', [ActivityController::class, 'store'])->name('activities.store');
+   
+//     Route::get('/activities/{id}/edit', [ActivityController::class, 'edit'])->name('activities.edit');
+//     Route::put('/activities/{id}', [ActivityController::class, 'update'])->name('activities.update');
+//     Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+   
+
+
+// });
+Route::resource('activities',ActivityController::class);
+
+
 
 
 

@@ -9,18 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('results', function (Blueprint $table) {
-            $table->id();
+            $table->id('id');
+            $table->boolean('result');
+            $table->foreignId('video_id')->constrained('videos', 'id')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('results');
     }

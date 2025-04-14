@@ -12,14 +12,16 @@ class Admin
 {
     public function handle(Request $request, Closure $next)
     {
-        $user = Auth::user();
 
-        if($user->role== 1){
+    $user = Auth::user();
 
-            return $next($request);
-
-        }
-        else
-            return redirect()->back();
+    if ($user && $user->role == 1) {
+        return $next($request);
     }
+
+    // Redirect to home or show error message if not an admin
+    return redirect('/')->with('error', 'You do not have admin access.');
+}
+
+
 }

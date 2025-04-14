@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Video; 
 use Illuminate\Http\Request;
 
 class ResultController extends Controller
@@ -27,5 +27,6 @@ class ResultController extends Controller
     public function destroy($id) {
 
     }
+
 
 }

@@ -59,4 +59,8 @@ class User extends Authenticatable
     {
         return $this->role === 1;
     }
+    public function videos()
+    {
+        return $this->hasMany(Video::class); // assuming a user can have multiple videos
+    }
 }
