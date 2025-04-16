@@ -13,7 +13,7 @@
                 <div class="navbar-nav">
                     <a class="nav-link active" aria-current="page" href="/">Home</a>
                     <a class="nav-link" href="{{ route('profile.show', ['user' => auth()->id()]) }}">Profile</a>
-                    <a class="nav-link" href="/activities">Activities</a>
+                    <a class="nav-link" href="{{ route('categories.index')}}">Activities</a>
                     <a class="nav-link" href="{{ route('dashboard')}}">Dashboard</a>
                     <a class="nav-link" href="/about">About</a>
                     <a class="nav-link" href="/contact">Contact</a>

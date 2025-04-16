@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 use App\Models\Activity;
 use Illuminate\Http\Request;
-use Auth;
+use Illuminate\Support\Facades\Auth;
+
 
 class ActivityController extends Controller
 {
     public function index()
-{
+    {
     $user = Auth::user();
 
     $latestVideo = $user->videos()->latest()->first();
@@ -21,16 +22,17 @@ class ActivityController extends Controller
 
     $query = Activity::query();
 
-    if ($resultValue == 0) {
-        $query->where('category', '!=', 'communication');
-    }
+    // if ($resultValue == 0) {
+    //     $query->where('category', '!=', 'Communication');
+    // }
 
     $activities = $query->get();
 
     return view('activities.index', compact('activities'));
-}    public function create(){
+    }
+public function create(){
         return view('activities.create');
-       
+
 
     }
 
@@ -39,13 +41,12 @@ class ActivityController extends Controller
     // Validation
     $validated = $request->validate([
         'name' => 'required|max:255',
-        'category' => 'required|max:255',
         'description' => 'nullable',
         'content' => 'nullable',
         'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
-    // Handle file upload 
+    // Handle file upload
     if ($request->hasFile('photo')) {
         $photoPath = $request->file('photo')->store('public/activities');
     } else {
@@ -53,18 +54,19 @@ class ActivityController extends Controller
     }
 
     // Store activity in the database
-    Activity::create([
-        'name' => $validated['name'],
-        'category' => $validated['category'],
-        'description' => $validated['description'],
-        'content' => $validated['content'],
-        'photo' => $photoPath,
-    ]);
+    // [
+    //     'name' => $validated['name'],
+    //     'category' => $validated['category'],
+    //     'description' => $validated['description'],
+    //     'content' => $validated['content'],
+    //     'photo' => $photoPath,
+    // ]
+    Activity::create($validated);
 
     return redirect()->route('activities.index')->with('success', 'Activity created successfully!');
 }
 
-    
+
     public function show($id)
     {
         $activity = Activity::findOrFail($id);
@@ -82,16 +84,14 @@ class ActivityController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'content' => 'required|string',
-            'category' => 'required|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-       
+
         $activity = Activity::findOrFail($id);
         $activity->name = $request->name;
         $activity->description = $request->description;
         $activity->content = $request->content;
-        $activity->category = $request->category;
 
         if ($request->hasFile('photo')) {
             // Delete the old photo if it exists

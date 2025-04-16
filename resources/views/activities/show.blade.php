@@ -10,7 +10,7 @@
         <img src="{{ asset('storage/' . $activity->photo) }}" alt="{{ $activity->name }}" class="image">
     @endif
 
-    <a href="{{ route('activities.index') }}" class="btn btn-primary ">Back to Activities</a>
+    <a href="{{ route('categories.index') }}" class="btn btn-primary ">Back to Activities</a>
 
     <!-- Admin controls: Check if the user is an admin -->
     @if (auth()->check() && auth()->user()->role == 1)  <!-- Check if the role is 1 (admin) -->
