@@ -18,7 +18,8 @@
                         <td>{{ $activity->description }}</td>
                         <td>{{ $activity->content }}</td>
                         <td>
-                            <a href="{{ route('activities.edit', $activity->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="{{ route('activities.create') }}" class="btn btn-sm btn-primary px-2">+ Add</a>
+                            <a href="{{ route('activities.edit', $activity->id) }}" class="btn btn-sm btn-success">Edit</a>
                             <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" style="display: inline-block;">
                                 @csrf
                                 @method('DELETE')

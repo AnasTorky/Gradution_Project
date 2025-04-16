@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\Activity;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -75,7 +76,8 @@ public function create(){
     public function edit($id)
     {
         $activity = Activity::findOrFail($id);
-        return view('activities.edit', compact('activity'));
+       $categories = Category::all(); 
+        return view('activities.edit', compact('activity','categories'));
     }
 
     public function update(Request $request, $id)

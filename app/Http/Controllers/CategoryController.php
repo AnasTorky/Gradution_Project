@@ -33,7 +33,8 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
         public function create(){
-            return view('categories.create');
+            // return view('categories.create');
+            dd('Reached Activity Create Page');
         }
 
         public function store(Request $request)

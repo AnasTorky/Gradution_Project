@@ -22,6 +22,8 @@
                             </span>
                         </td>
                         <td>
+                            <a href="{{ route('user.editRole', $user->id) }}" class="btn btn-sm btn-warning">Edit Role</a>
+
                             <form action="{{ route('user.destroy', $user->id) }}" method="POST" style="display: inline-block;">
                                 @csrf
                                 @method('DELETE')

@@ -39,4 +39,24 @@ class AdminController extends Controller
         $user = Auth::id();
         return redirect()->route('users',$user);
     }
+    public function editRole($id)
+{
+    $user = User::findOrFail($id);
+    return view('admin.edit-role', compact('user'));
+}
+
+public function updateRole(Request $request, $id)
+{
+    $request->validate([
+        'role' => 'required|in:0,1', // or your actual roles
+    ]);
+
+    $user = User::findOrFail($id);
+    $user->role = $request->role;
+    $user->save();
+
+    return redirect()->route('users')->with('success', 'Role updated successfully!');
+}
+
+
 }

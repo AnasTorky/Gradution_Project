@@ -61,6 +61,9 @@ Route::middleware(['auth',\App\Http\Middleware\Admin::class])->group(function ()
     Route::get('dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::delete('/user/{user?}', [AdminController::class, 'destroy_user'])->name('user.destroy');
+    Route::get('/user/{id}/edit-role', [AdminController::class, 'editRole'])->name('user.editRole');
+    Route::put('/user/{id}/update-role', [AdminController::class, 'updateRole'])->name('user.updateRole');
+
 // admin activities
     Route::get('/admin/activities', [AdminController::class, 'activities'])->name('admin.activities');
     Route::get('/activities/add', [ActivityController::class, 'create'])->name('activities.create');
@@ -71,7 +74,7 @@ Route::middleware(['auth',\App\Http\Middleware\Admin::class])->group(function ()
 
 
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
-    Route::get('/categories/add', [CategoryController::class, 'create'])->name('categories.create');
+    
     Route::post('/categories/store', [CategoryController::class, 'store'])->name('categories.store');
     Route::get('/categories/{id}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
@@ -79,7 +82,7 @@ Route::middleware(['auth',\App\Http\Middleware\Admin::class])->group(function ()
 });
 
 
-
+Route::get('/categories/add', [CategoryController::class, 'create'])->name('categories.create');
 
 
 

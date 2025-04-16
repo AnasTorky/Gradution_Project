@@ -2,7 +2,7 @@
     <div class="container">
     <h1>{{ $activity->name }}</h1>
 
-    <p><strong>Category:</strong> {{ $activity->category }}</p>
+    <p><strong>Category:</strong> {{ $activity->category->name }}</p>
     <p><strong>Description:</strong> {{ $activity->description }}</p>
     <p><strong>Content:</strong> {{ $activity->content }}</p>
 

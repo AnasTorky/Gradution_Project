@@ -112,7 +112,7 @@
             @foreach ($activities as $activity)
                 <div class="activity-card-item">
                     <h3><a href="{{ route('activities.show', $activity->id) }}">{{ $activity->name }}</a></h3>
-                    <p class="category">{{ $activity->category }}</p>
+                    <p class="category">{{ $activity->category->name }}</p>
                     <p>{{ Str::limit($activity->description, 100) }}</p>
                     <p>{{ Str::limit($activity->content, 50) }}</p>
 
