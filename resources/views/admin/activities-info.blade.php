@@ -1,6 +1,7 @@
 <x-layout>
     <div class="container">
         <h1>Activities Management</h1>
+        <a href="{{ route('activities.create') }}" class="btn btn-sm btn-primary px-2">+ Add</a>
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead class="thead-dark">
@@ -18,7 +19,6 @@
                         <td>{{ $activity->description }}</td>
                         <td>{{ $activity->content }}</td>
                         <td>
-                            <a href="{{ route('activities.create') }}" class="btn btn-sm btn-primary px-2">+ Add</a>
                             <a href="{{ route('activities.edit', $activity->id) }}" class="btn btn-sm btn-success">Edit</a>
                             <form action="{{ route('activities.destroy', $activity->id) }}" method="POST" style="display: inline-block;">
                                 @csrf

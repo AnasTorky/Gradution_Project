@@ -25,7 +25,10 @@
                 <label for="category">Category</label>
                 <select name="category_id" id="category" required>
                 @foreach($categories as $category)
-                        <option value="{{ $category->id }}">{{$category->name}}</option>
+                    <option value="{{ $category->id }}"
+                        {{ $category->id == old('category_id', $activity->category_id) ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
                 @endforeach
                 </select>
             </div>
