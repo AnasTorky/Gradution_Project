@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Result extends Model
 {
-    protected $fillable = ['result','video_id'];
+    protected $guarded=[];
     public function video()
 {
     return $this->belongsTo(Video::class);
