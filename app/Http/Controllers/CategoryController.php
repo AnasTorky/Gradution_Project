@@ -16,7 +16,7 @@ class CategoryController extends Controller
 
         $latestVideo = $user->videos()->latest()->first();
 
-        $resultValue = 0; // Default
+        $resultValue = 'normal'; // Default
 
         if ($latestVideo && $latestVideo->result) {
             $resultValue = $latestVideo->result->result; // Access result through relationship
@@ -24,7 +24,7 @@ class CategoryController extends Controller
 
         $query = Category::query();
 
-        if ($resultValue == 0) {
+        if ($resultValue == "normal") {
             $query->where('name', '!=', 'Communication');
         }
 

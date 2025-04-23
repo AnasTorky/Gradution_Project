@@ -76,16 +76,17 @@ public function create(){
     public function edit($id)
     {
         $activity = Activity::findOrFail($id);
-       $categories = Category::all(); 
+       $categories = Category::all();
         return view('activities.edit', compact('activity','categories'));
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated=$request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -94,6 +95,7 @@ public function create(){
         $activity->name = $request->name;
         $activity->description = $request->description;
         $activity->content = $request->content;
+        $activity->category_id = $validated['category_id'];
 
         if ($request->hasFile('photo')) {
             // Delete the old photo if it exists

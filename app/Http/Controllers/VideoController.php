@@ -5,20 +5,21 @@ use Illuminate\Http\Request;
 use App\Models\Video;
 use App\Models\Result;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http; 
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class VideoController extends Controller
 {
     public function create()
     {
-        return view('video.upload'); 
+        return view('video.upload');
     }
 
     public function store(Request $request)
     {
         // Validate the incoming request
         $request->validate([
-            'video' => 'required|file|mimes:mp4,avi,mov', 
+            'video' => 'required|file|mimes:mp4,avi,mov',
         ]);
 
         // Check if a video file has been uploaded
@@ -28,8 +29,8 @@ class VideoController extends Controller
 
             // Create a new Video record in the database
             $video = Video::create([
-                'video' => $videoPath,  
-                'user_id' => Auth::id(), 
+                'video' => $videoPath,
+                'user_id' => Auth::id(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

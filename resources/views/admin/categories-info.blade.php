@@ -1,6 +1,7 @@
 <x-layout>
     <div class="container">
         <h1>Categories Management</h1>
+        <a href="{{ route('categories.create') }}" class="btn btn-sm btn-primary px-2">add</a>
         <div class="table-responsive">
             <table class="table table-striped table-hover">
                 <thead class="thead-dark">
@@ -18,7 +19,6 @@
                         <td>{{ $category->description }}</td>
                         <td>{{ $category->content }}</td>
                         <td>
-                            <a href="{{ route('categories.create') }}" class="btn btn-sm btn-primary px-2">add</a>
                             <a href="{{ route('categories.edit', $category->id) }}" class="btn btn-sm btn-success">Edit</a>
                             <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display: inline-block;">
                                 @csrf

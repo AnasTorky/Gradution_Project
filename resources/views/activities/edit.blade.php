@@ -21,13 +21,19 @@
                 <textarea id="content" name="content" class="form-control" required>{{ $activity->content }}</textarea>
             </div>
 
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select name="category_id" id="category" required>
-                @foreach($categories as $category)
-                        <option value="{{ $category->id }}">{{$category->name}}</option>
-                @endforeach
+            <div class="form-group mb-3">
+                <label for="category_id">Category</label>
+                <select name="category_id" id="category_id" class="form-select" required>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}"
+                            {{ $category->id == $activity->category_id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
                 </select>
+                @error('category_id')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group">

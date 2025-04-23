@@ -3,7 +3,7 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Request;
+use Illuminate\Support\Facades\Request;
 
 class Video extends Model
 {
@@ -12,7 +12,7 @@ class Video extends Model
     public function store(Request $request)
 {
     // Validate and handle the video upload as before...
-    
+
     // After successful upload, redirect back to home
     return redirect()->route('home')->with('success', 'Video uploaded successfully!');
 }
