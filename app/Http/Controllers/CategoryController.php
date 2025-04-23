@@ -35,6 +35,8 @@ class CategoryController extends Controller
         public function create(){
             // return view('categories.create');
             dd('Reached Activity Create Page');
+
+            
         }
 
         public function store(Request $request)

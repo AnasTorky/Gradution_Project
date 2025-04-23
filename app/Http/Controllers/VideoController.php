@@ -21,8 +21,9 @@ class VideoController extends Controller
             'video' => 'required|file|mimes:mp4,avi,mov', 
         ]);
 
-        // Handle the file upload
+        // Check if a video file has been uploaded
         if ($request->hasFile('video')) {
+            // Handle the file upload
             $videoPath = $request->file('video')->store('videos', 'public');
 
             // Create a new Video record in the database
@@ -33,34 +34,39 @@ class VideoController extends Controller
                 'updated_at' => now(),
             ]);
 
-            // Now, send the video to the Flask API for prediction
-            $response = Http::attach(
-                'video',
-                file_get_contents(storage_path('app/public/' . $videoPath)),
-                basename($videoPath)
-            )->post('http://127.0.0.1:5000/predict'); // Flask server URL
+            // Send the video to the Flask API for prediction
+            try {
+                $response = Http::withoutVerifying()->attach(
+                    'video',  // Field name as expected by Flask
+                    file_get_contents(storage_path('app/public/' . $videoPath)),
+                    basename($videoPath)
+                )->post('https://web-production-0e42.up.railway.app//predict');  // Flask API URL
 
-            // Check if the request was successful
-            if ($response->successful()) {
-                // Retrieve the prediction from the response
-                $prediction = $response->json()['prediction'];
+                // Check if the request was successful
+                if ($response->successful()) {
+                    // Retrieve the prediction from the response
+                    $prediction = $response->json()['prediction'];
 
-                // Save the result in the database
-                Result::create([
-                    'video_id' => $video->id,  
-                    'result' => $prediction, 
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                    // Save the result in the database
+                    Result::create([
+                        'video_id' => $video->id,  
+                        'result' => $prediction, 
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
 
-                // Redirect to the result page with the prediction
-                return view('video.result', [
-                    'result' => $prediction,
-                    'video' => $video
-                ]);
-            } else {
-                // Handle the error if the prediction fails
-                return redirect()->route('video.upload')->with('error', 'Failed to get prediction from AI model.');
+                    // Redirect to the result page with the prediction
+                    return view('video.result', [
+                        'result' => $prediction,
+                        'video' => $video
+                    ]);
+                } else {
+                    // Handle the error if the prediction fails
+                    return redirect()->route('video.upload')->with('error', 'Failed to get prediction from AI model.');
+                }
+            } catch (\Exception $e) {
+                // Handle connection errors
+                return redirect()->route('video.upload')->with('error', 'Error communicating with the Flask API: ' . $e->getMessage());
             }
         }
 
@@ -68,5 +74,3 @@ class VideoController extends Controller
         return redirect()->route('video.upload')->with('error', 'No video file uploaded.');
     }
 }
-
-
