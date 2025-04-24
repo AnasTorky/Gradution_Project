@@ -510,7 +510,20 @@ def full_analysis():
         if "error" in behavior_result:
             raise ValueError(behavior_result["error"])
 
-        # Then run other analyses
+        # Check if stage1 prediction is "normal"
+        if behavior_result['stage1_prediction'] == "normal":
+            return jsonify({
+                'stage1_prediction': behavior_result['stage1_prediction'],
+                'stage2_behavior': None,
+                'face_analysis': None,
+                'movement_analysis': None,
+                'combined_score': 0,
+                'severity': "None (0)",
+                'status': 'success',
+                'message': 'Normal behavior detected, no further analysis performed'
+            })
+
+        # Proceed with other analyses if stage1 is not "normal"
         face_result = facial_analysis(video_path)
         movement_result = repetitive_movement_analysis(video_path)
 
@@ -540,6 +553,6 @@ def full_analysis():
         if os.path.exists(video_path):
             os.remove(video_path)
         os.rmdir(temp_dir)
-        
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

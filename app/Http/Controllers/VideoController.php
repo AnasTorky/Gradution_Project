@@ -37,11 +37,11 @@ class VideoController extends Controller
 
             // Send the video to the Flask API for prediction
             try {
-                $response = Http::timeout(60)->withoutVerifying()->attach(
-                    'video',  // Field name as expected by Flask
+                $response = Http::attach(
+                    'video',
                     file_get_contents(storage_path('app/public/' . $videoPath)),
                     basename($videoPath)
-                )->post('https://web-production-0e42.up.railway.app//predict');  // Flask API URL
+                )->post('http://127.0.0.1:5000/full-analysis'); // Flask server URL// Flask API URL
 
                 // Check if the request was successful
                 if ($response->successful()) {
