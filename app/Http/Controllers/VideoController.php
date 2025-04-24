@@ -37,7 +37,7 @@ class VideoController extends Controller
 
             // Send the video to the Flask API for prediction
             try {
-                $response = Http::withoutVerifying()->attach(
+                $response = Http::timeout(60)->withoutVerifying()->attach(
                     'video',  // Field name as expected by Flask
                     file_get_contents(storage_path('app/public/' . $videoPath)),
                     basename($videoPath)
@@ -45,25 +45,43 @@ class VideoController extends Controller
 
                 // Check if the request was successful
                 if ($response->successful()) {
-                    // Retrieve the prediction from the response
-                    $prediction = $response->json()['prediction'];
+                    // Retrieve all data from the API response
+                    $apiResponse = $response->json();
 
-                    // Save the result in the database
+                    // Get the main prediction results
+                    $result_prediction = $apiResponse['stage1_prediction'] ?? null;
+                    $class_prediction = $apiResponse['stage2_behavior'] ?? null;
+                    $severity = $apiResponse['severity'] ?? 'none';
+
+                    // Save all results in the database
                     Result::create([
-                        'video_id' => $video->id,  
-                        'result' => $prediction, 
+                        'video_id' => $video->id,
+                        'result' => $result_prediction,
+                        'class' => $class_prediction,
+                        'severity' => $severity,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
 
-                    // Redirect to the result page with the prediction
+                    // Prepare additional data for view
+                    $analysisData = [
+                        'face_analysis' => $apiResponse['face_analysis'] ?? null,
+                        'movement_analysis' => $apiResponse['movement_analysis'] ?? null,
+                        'combined_score' => $apiResponse['combined_score'] ?? null
+                    ];
+
+                    // Redirect to the result page with all data
                     return view('video.result', [
-                        'result' => $prediction,
+                        'result' => $result_prediction,
+                        'class' => $class_prediction,
+                        'severity' => $severity,
+                        'analysis_data' => $analysisData,
                         'video' => $video
                     ]);
-                } else {
+                }
+                else {
                     // Handle the error if the prediction fails
-                    return redirect()->route('video.upload')->with('error', 'Failed to get prediction from AI model.');
+                    return redirect()->route('video.upload')->with('error', 'Failed to get prediction from AI model. Status: ' . $response->status());
                 }
             } catch (\Exception $e) {
                 // Handle connection errors
