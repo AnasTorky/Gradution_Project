@@ -19,77 +19,103 @@ class VideoController extends Controller
     {
         // Validate the incoming request
         $request->validate([
-            'video' => 'required|file|mimes:mp4,avi,mov',
+            'video' => 'required|file|mimes:mp4,avi,mov|max:102400', // Added max size (100MB)
         ]);
 
         // Check if a video file has been uploaded
-        if ($request->hasFile('video')) {
-            // Handle the file upload
-            $videoPath = $request->file('video')->store('videos', 'public');
-
-            // Create a new Video record in the database
-            $video = Video::create([
-                'video' => $videoPath,
-                'user_id' => Auth::id(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            // Send the video to the Flask API for prediction
-            try {
-                $response = Http::attach(
-                    'video',
-                    file_get_contents(storage_path('app/public/' . $videoPath)),
-                    basename($videoPath)
-                )->post('http://127.0.0.1:5000/full-analysis'); // Flask server URL// Flask API URL
-
-                // Check if the request was successful
-                if ($response->successful()) {
-                    // Retrieve all data from the API response
-                    $apiResponse = $response->json();
-
-                    // Get the main prediction results
-                    $result_prediction = $apiResponse['stage1_prediction'] ?? null;
-                    $class_prediction = $apiResponse['stage2_behavior'] ?? null;
-                    $severity = $apiResponse['severity'] ?? 'none';
-
-                    // Save all results in the database
-                    Result::create([
-                        'video_id' => $video->id,
-                        'result' => $result_prediction,
-                        'class' => $class_prediction,
-                        'severity' => $severity,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-
-                    // Prepare additional data for view
-                    $analysisData = [
-                        'face_analysis' => $apiResponse['face_analysis'] ?? null,
-                        'movement_analysis' => $apiResponse['movement_analysis'] ?? null,
-                        'combined_score' => $apiResponse['combined_score'] ?? null
-                    ];
-
-                    // Redirect to the result page with all data
-                    return view('video.result', [
-                        'result' => $result_prediction,
-                        'class' => $class_prediction,
-                        'severity' => $severity,
-                        'analysis_data' => $analysisData,
-                        'video' => $video
-                    ]);
-                }
-                else {
-                    // Handle the error if the prediction fails
-                    return redirect()->route('video.upload')->with('error', 'Failed to get prediction from AI model. Status: ' . $response->status());
-                }
-            } catch (\Exception $e) {
-                // Handle connection errors
-                return redirect()->route('video.upload')->with('error', 'Error communicating with the Flask API: ' . $e->getMessage());
-            }
+        if (!$request->hasFile('video') || !$request->file('video')->isValid()) {
+            Log::error('No valid video file uploaded');
+            return redirect()->route('video.upload')->with('error', 'No valid video file uploaded.');
         }
 
-        // Redirect back with error if no file was uploaded
-        return redirect()->route('video.upload')->with('error', 'No video file uploaded.');
+        // Store the video
+        $videoPath = $request->file('video')->store('videos', 'public');
+        $fullPath = storage_path('app/public/' . $videoPath);
+        Log::info('Video path: ' . $fullPath);
+        Log::info('File exists: ' . (file_exists($fullPath) ? 'Yes' : 'No'));
+        Log::info('File readable: ' . (is_readable($fullPath) ? 'Yes' : 'No'));
+
+        // Verify file is readable
+        if (!file_exists($fullPath) || !is_readable($fullPath)) {
+            Log::error('Video file not found or not readable: ' . $fullPath);
+            return redirect()->route('video.upload')->with('error', 'Video file could not be processed.');
+        }
+
+        // Create video record
+        $video = Video::create([
+            'video' => $videoPath,
+            'user_id' => Auth::id(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        Log::info('Video record created: ID ' . $video->id);
+
+        // Send to Flask API
+        try {
+            $response = Http::timeout(300)->attach(
+                'video',
+                file_get_contents($fullPath),
+                basename($videoPath)
+            )->post('http://127.0.0.1:5000/full-analysis');
+
+            Log::info('Flask API status: ' . $response->status());
+            Log::info('Flask API response: ' . json_encode($response->json(), JSON_PRETTY_PRINT));
+
+            if ($response->successful()) {
+                $apiResponse = $response->json();
+
+                // Validate response structure
+                if (!is_array($apiResponse) || !isset($apiResponse['status'])) {
+                    Log::error('Invalid Flask API response structure: ' . json_encode($apiResponse));
+                    return redirect()->route('video.upload')->with('error', 'Invalid response from AI model.');
+                }
+
+                // Check if Flask returned an error
+                if ($apiResponse['status'] !== 'success') {
+                    Log::error('Flask API error response: ' . json_encode($apiResponse));
+                    return redirect()->route('video.upload')->with('error', 'AI model error: ' . ($apiResponse['error'] ?? 'Unknown error'));
+                }
+
+                // Extract prediction results
+                $result_prediction = $apiResponse['stage1_prediction'] ?? null;
+                $class_prediction = $apiResponse['stage2_behavior'] ?? null;
+                $severity = $apiResponse['severity'] ?? 'none';
+                $face_analysis = $apiResponse['face_analysis'] ?? null;
+                $movement_analysis = $apiResponse['movement_analysis'] ?? null;
+                $combined_score =  $apiResponse['combined_score'] ?? null;
+
+                // Save to database
+                $result = Result::create([
+                    'video_id' => $video->id,
+                    'result' => $result_prediction,
+                    'class' => $class_prediction,
+                    'severity' => $severity,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                Log::info('Result saved to database: ID ' . $result->id);
+
+
+                
+                // Return result view
+                 return view('video.result', 
+                 compact("result_prediction","class_prediction","severity","face_analysis","movement_analysis","combined_score")
+                 //[
+                //     'result' => $result_prediction,
+                //     'class' => $class_prediction,
+                //     'severity' => $severity,
+                //     'video' => $video,]
+                );
+            } else {
+                Log::error('Flask API failed: Status ' . $response->status() . ', Body: ' . $response->body());
+                return redirect()->route('video.upload')->with('error', 'Failed to get prediction. Status: ' . $response->status());
+            }
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Connection error: ' . $e->getMessage());
+            return redirect()->route('video.upload')->with('error', 'Cannot connect to Flask API: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('General error: ' . $e->getMessage());
+            return redirect()->route('video.upload')->with('error', 'Error: ' . $e->getMessage());
+        }
     }
 }
