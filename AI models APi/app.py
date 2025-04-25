@@ -540,6 +540,6 @@ def full_analysis():
         if os.path.exists(video_path):
             os.remove(video_path)
         os.rmdir(temp_dir)
-        
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
