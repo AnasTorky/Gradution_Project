@@ -12,8 +12,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('results', function (Blueprint $table) {
-            $table->string('class')->after('result');
+            $table->string('class')->after('result')->nullable();
             $table->string('severity')->after('class')->nullable();
+            
         });
     }
 

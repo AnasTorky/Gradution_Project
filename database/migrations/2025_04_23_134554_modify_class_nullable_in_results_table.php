@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('results', function (Blueprint $table) {
             $table->string('class')->nullable()->change();
+            
         });
     }
 

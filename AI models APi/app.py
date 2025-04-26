@@ -106,7 +106,7 @@ def get_severity(score):
         return "Moderate"
     elif 8 <= score <= 10:
         return "Severe"
-    return "None (0)"
+    return None
 
 # --- Facial Analysis Functions ---
 def estimate_head_pose(face_results, frame):
@@ -492,51 +492,70 @@ def analyze_behavior():
 
 @app.route('/full-analysis', methods=['POST'])
 def full_analysis():
+    logger.info("Full analysis endpoint called")
     if 'video' not in request.files:
+        logger.error("No video file provided")
         return jsonify({'error': 'No video file provided'}), 400
-
+    
     video_file = request.files['video']
     if video_file.filename == '':
+        logger.error("No selected file")
         return jsonify({'error': 'No selected file'}), 400
 
-    # Save video temporarily
     temp_dir = tempfile.mkdtemp()
     video_path = os.path.join(temp_dir, secure_filename(video_file.filename))
     video_file.save(video_path)
 
     try:
-        # Run behavior analysis first to get stage1 and stage2 predictions
         behavior_result = behavior_analysis(video_path)
         if "error" in behavior_result:
-            raise ValueError(behavior_result["error"])
+            logger.error(f"Behavior analysis error: {behavior_result['error']}")
+            return jsonify(behavior_result), 400
 
-        # Then run other analyses
+        if behavior_result['stage1_prediction'] == "normal":
+            return jsonify({
+                'stage1_prediction': behavior_result['stage1_prediction'],
+                'stage2_behavior': None,
+                'face_analysis': None,
+                'movement_analysis': None,
+                'combined_score': 0,
+                'severity': "None (0)",
+                'status': 'success',
+                'message': 'Normal behavior detected'
+            })
+
         face_result = facial_analysis(video_path)
         movement_result = repetitive_movement_analysis(video_path)
 
-        # Calculate combined score
+        if "error" in face_result or "error" in movement_result:
+            logger.error(f"Face error: {face_result.get('error', '')}, Movement error: {movement_result.get('error', '')}")
+            return jsonify({'error': 'Analysis failed', 'face_error': face_result.get('error'), 'movement_error': movement_result.get('error')}), 400
+
         combined_score = int(round((
             face_result.get('eye_score', 5) +
             face_result.get('emotion_score', 5) +
             movement_result.get('repetitive_score', 5)
         ) / 3))
-
         severity = get_severity(combined_score)
 
         return jsonify({
             'stage1_prediction': behavior_result['stage1_prediction'],
             'stage2_behavior': behavior_result['stage2_behavior'],
-            'face_analysis': face_result,
-            'movement_analysis': movement_result,
+            'face_analysis': {
+                'eye_score': face_result.get('eye_score'),
+                'emotion_score': face_result.get('emotion_score')
+            },
+            'movement_analysis': {
+                'repetitive_score': movement_result.get('repetitive_score')
+            },
             'combined_score': combined_score,
             'severity': severity,
             'status': 'success'
         })
     except Exception as e:
-        logger.error(f"Error in full analysis: {str(e)}")
+        logger.error(f"Full analysis error: {str(e)}")
         return jsonify({'error': str(e)}), 500
     finally:
-        # Clean up
         if os.path.exists(video_path):
             os.remove(video_path)
         os.rmdir(temp_dir)
