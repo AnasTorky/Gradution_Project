@@ -8,55 +8,87 @@ use App\Models\Activity;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 
-
 class AdminController extends Controller
 {
+    // Dashboard stats
     public function dashboard()
     {
         $stats = [
             'totalUsers' => User::count(),
             'adminCount' => User::where('role', 'admin')->count(),
         ];
-        return view('admin.dashboard', $stats);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $stats
+        ], 200);
     }
+
+    // List all users
     public function users()
     {
         $users = User::all();
-        return view('admin.users-info', compact('users'));
+        return response()->json([
+            'status' => 'success',
+            'data' => $users
+        ], 200);
     }
+
+    // List all activities
     public function activities()
     {
         $activities = Activity::all();
-        return view('admin.activities-info', compact('activities'));
+        return response()->json([
+            'status' => 'success',
+            'data' => $activities
+        ], 200);
     }
+
+    // List all categories
     public function categories()
     {
         $categories = Category::all();
-        return view('admin.categories-info', compact('categories'));
+        return response()->json([
+            'status' => 'success',
+            'data' => $categories
+        ], 200);
     }
-    public function destroy_user(User $user) {
+
+    // Delete a user
+    public function destroy_user(User $user)
+    {
         $user->delete();
-        $user = Auth::id();
-        return redirect()->route('users',$user);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User deleted successfully'
+        ], 200);
     }
+
+    // Get a user's role
     public function editRole($id)
-{
-    $user = User::findOrFail($id);
-    return view('admin.edit-role', compact('user'));
-}
+    {
+        $user = User::findOrFail($id);
+        return response()->json([
+            'status' => 'success',
+            'data' => ['id' => $user->id, 'role' => $user->role]
+        ], 200);
+    }
 
-public function updateRole(Request $request, $id)
-{
-    $request->validate([
-        'role' => 'required|in:0,1', // or your actual roles
-    ]);
+    // Update a user's role
+    public function updateRole(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required|in:0,1', // or 'admin,user' if roles are strings
+        ]);
 
-    $user = User::findOrFail($id);
-    $user->role = $request->role;
-    $user->save();
+        $user = User::findOrFail($id);
+        $user->role = $request->role;
+        $user->save();
 
-    return redirect()->route('users')->with('success', 'Role updated successfully!');
-}
-
-
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Role updated successfully',
+            'data' => $user
+        ], 200);
+    }
 }

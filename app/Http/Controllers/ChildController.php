@@ -1,49 +1,64 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Models\Child;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChildController extends Controller
 {
-    public function create(){
-        return view("children.create-child");
-    }
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'age' => 'required|integer|min:1'
+            'age' => 'required|integer|min:1',
         ]);
 
-        $child = new Child();
-        $child->name = $request->name;
-        $child->age = $request->age;
-        $child->user_id = Auth::user()->id;
-        $child->save();
-        $user = Auth::id();
-        return redirect()->route('profile.show',$user)->with('success', 'Child created successfully!');
+        $child = Child::create([
+            'name' => $request->name,
+            'age' => $request->age,
+            'user_id' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'child' => $child,
+            'message' => 'Child created successfully',
+        ], 201);
     }
-    public function edit(Child $child) {
-        return view('children.edit-child', ['child' => $child]);
-    }
-    public function update(Request $request,Child $child) {
+
+    public function update(Request $request, Child $child)
+    {
+        // التحقق من أن المستخدم لديه صلاحية لتعديل الطفل
+        if ($child->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'age' => 'required|integer|min:1'
+            'age' => 'required|integer|min:1',
         ]);
+
         $child->update([
-            'name'=>request('name'),
-            'age'=>request('age'),
+            'name' => $request->name,
+            'age' => $request->age,
         ]);
-        $user = Auth::id();
-        return redirect()->route('profile.show', $user);
+
+        return response()->json([
+            'child' => $child,
+            'message' => 'Child updated successfully',
+        ]);
     }
-    public function destroy(Child $child) {
+
+    public function destroy(Child $child)
+    {
+        // التحقق من أن المستخدم لديه صلاحية لحذف الطفل
+        if ($child->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $child->delete();
-        $user = Auth::id();
-        return redirect()->route('profile.show',$user);
+
+        return response()->json([
+            'message' => 'Child deleted successfully',
+        ]);
     }
 }

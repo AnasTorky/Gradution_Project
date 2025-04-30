@@ -1,15 +1,17 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function show(User $user)
+    public function show(Request $request)
     {
-        $user->load('children');
+        $user = Auth::user()->load('children');
 
-        return view('auth.profile', compact('user'));
+        return response()->json([
+            'user' => $user,
+        ]);
     }
 }

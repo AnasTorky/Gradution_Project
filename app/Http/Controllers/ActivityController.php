@@ -1,140 +1,129 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Storage;
 
 class ActivityController extends Controller
 {
     public function index()
     {
-    $user = Auth::user();
+        $user = Auth::user();
+        $latestVideo = $user->videos()->latest()->first();
 
-    $latestVideo = $user->videos()->latest()->first();
+        $resultValue = $latestVideo && $latestVideo->result
+            ? $latestVideo->result->result
+            : 0;
 
-    $resultValue = 0; // Default
+        $query = Activity::query();
+        // Uncomment if needed
+        // if ($resultValue == 0) {
+        //     $query->where('category', '!=', 'Communication');
+        // }
 
-    if ($latestVideo && $latestVideo->result) {
-        $resultValue = $latestVideo->result->result; // Access result through relationship
-    }
+        $activities = $query->with('category')->get();
 
-    $query = Activity::query();
-
-    // if ($resultValue == 0) {
-    //     $query->where('category', '!=', 'Communication');
-    // }
-
-    $activities = $query->get();
-
-    return view('activities.index', compact('activities'));
-    }
-public function create(){
-        return view('activities.create');
-
-
+        return response()->json($activities, 200);
     }
 
     public function store(Request $request)
-{
-    // Validation
-    $validated = $request->validate([
-        'name' => 'required|max:255',
-        'description' => 'nullable',
-        'content' => 'nullable',
-        'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
-
-    // Handle file upload
-    if ($request->hasFile('photo')) {
-        $photoPath = $request->file('photo')->store('public/activities');
-    } else {
-        $photoPath = null;
-    }
-
-    // Store activity in the database
-    // [
-    //     'name' => $validated['name'],
-    //     'category' => $validated['category'],
-    //     'description' => $validated['description'],
-    //     'content' => $validated['content'],
-    //     'photo' => $photoPath,
-    // ]
-    Activity::create($validated);
-
-    return redirect()->route('activities.index')->with('success', 'Activity created successfully!');
-}
-
-
-    public function show($id)
     {
-        $activity = Activity::findOrFail($id);
-        return view('activities.show', compact('activity'));
-    }
-    public function edit($id)
-    {
-        $activity = Activity::findOrFail($id);
-       $categories = Category::all();
-        return view('activities.edit', compact('activity','categories'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $validated=$request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'content' => 'required|string',
+            'description' => 'nullable|string',
+            'content' => 'required|file|mimes:mp4,mov,avi|max:102400',
             'category_id' => 'required|exists:categories,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-
-        $activity = Activity::findOrFail($id);
-        $activity->name = $request->name;
-        $activity->description = $request->description;
-        $activity->content = $request->content;
-        $activity->category_id = $validated['category_id'];
+        if ($request->hasFile('content')) {
+            $validated['content'] = $request->file('content')->store('videos', 'public');
+        }
 
         if ($request->hasFile('photo')) {
-            // Delete the old photo if it exists
-            if ($activity->photo) {
-                unlink(storage_path('app/public/' . $activity->photo));
+            $validated['photo'] = $request->file('photo')->store('activities', 'public');
+        }
+
+        $activity = Activity::create($validated);
+
+        return response()->json([
+            'message' => 'Activity created successfully!',
+            'data' => $activity
+        ], 201);
+    }
+
+    public function show($id)
+    {
+        $activity = Activity::with('category')->find($id);
+
+        if (!$activity) {
+            return response()->json(['error' => 'Activity not found'], 404);
+        }
+
+        return response()->json($activity);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $activity = Activity::find($id);
+
+        if (!$activity) {
+            return response()->json(['error' => 'Activity not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'content' => 'nullable|file|mimes:mp4,mov,avi|max:102400',
+            'category_id' => 'required|exists:categories,id',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('content')) {
+            $validated['content'] = $request->file('content')->store('videos', 'public');
+        }
+
+        if ($request->hasFile('photo')) {
+            if ($activity->photo && Storage::disk('public')->exists($activity->photo)) {
+                Storage::disk('public')->delete($activity->photo);
             }
 
-            // Store the new photo
-            $photoPath = $request->file('photo')->store('photos', 'public');
-            $activity->photo = $photoPath;
+            $validated['photo'] = $request->file('photo')->store('activities', 'public');
         }
 
-        // Save the updated activity
-        $activity->save();
+        $activity->update($validated);
 
-        // Redirect back with a success message
-        return redirect()->route('activities.show', $activity->id)->with('success', 'Activity updated successfully!');
+        return response()->json([
+            'message' => 'Activity updated successfully!',
+            'data' => $activity
+        ]);
     }
 
-    // Remove the specified activity from storage
     public function destroy($id)
     {
-        // Retrieve the activity by ID
-        $activity = Activity::findOrFail($id);
+        $activity = Activity::find($id);
 
-        // Delete the photo if it exists
-        $path = public_path('storage/' . $activity->photo);
-
-        if (file_exists($path)) {
-            unlink($path);
+        if (!$activity) {
+            return response()->json(['error' => 'Activity not found'], 404);
         }
-        // Delete the activity
+
+        if ($activity->photo && Storage::disk('public')->exists($activity->photo)) {
+            Storage::disk('public')->delete($activity->photo);
+        }
+
         $activity->delete();
 
-        // Redirect back with a success message
-        return redirect()->route('activities.index')->with('success', 'Activity deleted successfully!');
+        return response()->json(['message' => 'Activity deleted successfully.']);
     }
 
-
+    public function categories()
+    {
+        $categories = Category::all();
+        return response()->json($categories);
+    }
 }
-
-
