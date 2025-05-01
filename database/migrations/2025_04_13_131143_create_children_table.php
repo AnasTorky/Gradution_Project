@@ -9,21 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('children', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->string('name');
-            $table->string('age');
+            $table->integer('age');
+            $table->string('skill')->nullable();
+            $table->string('preferred_activities')->nullable();
             $table->timestamps();
-            $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+    
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
-
+    
     /**
      * Reverse the migrations.
      */

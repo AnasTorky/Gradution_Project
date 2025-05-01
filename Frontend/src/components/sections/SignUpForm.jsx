@@ -41,7 +41,7 @@ const inputs = {
     handleChange,
     formData
   }) {
-    // تعريف دالة handleSignUpBack
+    
     const handleSignUpBack = (e) => {
       e.preventDefault();
       if (signUpMobility > 1) {
@@ -50,40 +50,69 @@ const inputs = {
     };
 
     const handleSignUpNext = async (e) => {
-        e.preventDefault();
-
-        if (signUpMobility === 3) {
-          try {
-            // حل بديل: استخدم fetch مباشرة
-            const csrfResponse = await fetch('http://localhost:8000/sanctum/csrf-cookie', {
-              credentials: 'include'
-            });
-
-            const response = await fetch('http://localhost:8000/api/register', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-              },
-              credentials: 'include',
-              body: JSON.stringify({
-                name: formData.fullname,
-                email: formData.email,
-                password: formData.password,
-                password_confirmation: formData.confirmPassword,
-              })
-            });
-
-            const data = await response.json();
-            localStorage.setItem('token', data.token);
-            window.location.reload();
-          } catch (error) {
-            console.error('Registration error:', error);
-          }
-        } else {
-          setSignUpMobility((mobility) => mobility + 1);
+      e.preventDefault();
+    
+      if (signUpMobility === 3) {
+        try {
+          // 1. Get CSRF cookie
+          await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+            credentials: 'include'
+          });
+    
+          // 2. Register the user
+          const registerResponse = await fetch('http://localhost:8000/api/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              name: formData.fullname,
+              email: formData.email,
+              password: formData.password,
+              password_confirmation: formData.confirmPassword,
+            }),
+          });
+    
+          const registerData = await registerResponse.json();
+    
+          // 3. Store token
+          localStorage.setItem('token', registerData.token);
+    
+          // 4. Add the child
+          const childResponse = await fetch('http://localhost:8000/api/children', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${registerData.token}`,
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              name: formData.childFullname,
+              age: parseInt(formData.childAge),
+              skill: formData.skill,
+              preferred_activities: formData.preferredActivities,
+            }),
+          });
+          
+    
+          const childData = await childResponse.json();
+    
+          console.log('Child saved:', childData);
+    
+          // 5. Optional: Navigate or reload
+          window.location.reload();
+    
+        } catch (error) {
+          console.error('Registration or child creation error:', error);
         }
-      };
+      } else {
+        setSignUpMobility((mobility) => mobility + 1);
+      }
+    };
+    
 
   return (
     <div className="max-w-sm w-full text-gray-600 space-y-5">

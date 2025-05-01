@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Child;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log; // أضف هذا السطر
@@ -18,6 +20,11 @@ class RegisterController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|confirmed|min:8',
+//child data
+            'childFullname' => 'nullable|string|max:255',
+            'childAge' => 'nullable|integer',
+            'skill' => 'nullable|string|max:255',
+            'preferredActivities' => 'nullable|string|max:255',
         ]);
 
         Log::info('Validated data:', $validated);
@@ -27,6 +34,15 @@ class RegisterController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
+        if (!empty($validated['childFullname'])) {
+            Child::create([
+                'user_id' => $user->id,
+                'name' => $validated['childFullname'],
+                'age' => $validated['childAge'],
+                'skill' => $validated['skill'],
+                'preferred_activities' => $validated['preferredActivities'],
+            ]);
+        }
 
         Log::info('User created successfully:', $user->toArray());
 

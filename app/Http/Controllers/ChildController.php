@@ -11,19 +11,24 @@ class ChildController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'age' => 'required|integer|min:1',
+            'skill' => 'nullable|string|max:255',
+            'preferred_activities' => 'nullable|string|max:255',
         ]);
-
+    
         $child = Child::create([
             'name' => $request->name,
             'age' => $request->age,
+            'skill' => $request->skill,
+            'preferred_activities' => $request->preferred_activities,
             'user_id' => Auth::id(),
         ]);
-
+    
         return response()->json([
             'child' => $child,
             'message' => 'Child created successfully',
         ], 201);
     }
+    
 
     public function update(Request $request, Child $child)
     {
