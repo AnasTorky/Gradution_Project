@@ -12,23 +12,23 @@ class RouteServiceProvider extends ServiceProvider
 {
     public const HOME = '/home';
 
-    protected $namespace = 'App\Http\Controllers';
+    // إزالة هذا السطر إذا كنت تستخدم Laravel 8+
+    // protected $namespace = 'App\Http\Controllers';
 
     public function boot()
-    {
-        $this->configureRateLimiting();
+{
+    $this->configureRateLimiting();
 
-        $this->routes(function () {
-            Route::prefix('api')
-                ->middleware('api')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/api.php'));
+    $this->routes(function () {
+        Route::prefix('api')
+            ->middleware('api')
+            ->as('api.')
+            ->group(base_path('routes/api.php'));
 
-            Route::middleware('web')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/web.php'));
-        });
-    }
+        Route::middleware('web')
+            ->group(base_path('routes/web.php'));
+    });
+}
 
     protected function configureRateLimiting()
     {

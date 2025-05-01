@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Activity;
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +14,7 @@ class CategoryController extends Controller
     {
         $user = Auth::user();
         $latestVideo = $user->videos()->latest()->first();
-        $resultValue = 'normal'; // Default
+        $resultValue = 'normal';
 
         if ($latestVideo && $latestVideo->result) {
             $resultValue = $latestVideo->result->result;
@@ -27,12 +27,8 @@ class CategoryController extends Controller
         }
 
         $categories = $query->get();
-        return view('categories.index', compact('categories'));
-    }
 
-    public function create()
-    {
-        return view('categories.create');
+        return response()->json(['categories' => $categories]);
     }
 
     public function store(Request $request)
@@ -48,14 +44,15 @@ class CategoryController extends Controller
             $validated['photo'] = $request->file('photo')->store('categories', 'public');
         }
 
-        Category::create($validated);
-        return redirect()->route('categories.index')->with('success', 'Category created successfully!');
+        $category = Category::create($validated);
+
+        return response()->json(['message' => 'Category created successfully!', 'category' => $category], 201);
     }
 
-    public function edit($id)
+    public function show($id)
     {
         $category = Category::findOrFail($id);
-        return view('categories.edit', compact('category'));
+        return response()->json(['category' => $category]);
     }
 
     public function update(Request $request, $id)
@@ -71,17 +68,15 @@ class CategoryController extends Controller
         $category->fill($validated);
 
         if ($request->hasFile('photo')) {
-            // Delete old photo if exists
             if ($category->photo && Storage::disk('public')->exists($category->photo)) {
                 Storage::disk('public')->delete($category->photo);
             }
-
             $category->photo = $request->file('photo')->store('categories', 'public');
         }
 
         $category->save();
 
-        return redirect()->route('categories.index')->with('success', 'Category updated successfully!');
+        return response()->json(['message' => 'Category updated successfully!', 'category' => $category]);
     }
 
     public function destroy($id)
@@ -94,14 +89,17 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully!');
+        return response()->json(['message' => 'Category deleted successfully!']);
     }
 
     public function show_activity($id)
     {
         $category = Category::findOrFail($id);
-        $activities = $category->activities; // Uses relationship
+        $activities = $category->activities;
 
-        return view('activities.index', compact('category', 'activities'));
+        return response()->json([
+            'category' => $category,
+            'activities' => $activities
+        ]);
     }
 }
