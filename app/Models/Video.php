@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Request;
 class Video extends Model
 {
     use HasFactory;
-    protected $fillable = ['video', 'user_id'];
+    protected $guarded=[];
     public function store(Request $request)
 {
     // Validate and handle the video upload as before...

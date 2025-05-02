@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Child extends Model
 {
-    protected $fillable = ['name', 'age', 'user_id'];
+    protected $guarded=[];
 
     public function user(): BelongsTo
     {
