@@ -496,7 +496,7 @@ def full_analysis():
     if 'video' not in request.files:
         logger.error("No video file provided")
         return jsonify({'error': 'No video file provided'}), 400
-    
+
     video_file = request.files['video']
     if video_file.filename == '':
         logger.error("No selected file")
