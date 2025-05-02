@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Child extends Model
 {
-    protected $guarded=[];
-
+    protected $guarded = [];
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
