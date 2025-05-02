@@ -1,7 +1,6 @@
 import Button from "../common/Button";
 import { useDropzone } from "react-dropzone";
 import { FiUploadCloud, FiCheckCircle } from "react-icons/fi";
-import axios from 'axios'; 
 
 const FileUploader = ({
   onFilesSelected,
@@ -30,35 +29,6 @@ const FileUploader = ({
       }
     },
   });
-  const handleUpload = async () => {
-    if (files.length === 0) return;
-  
-    try {
-      // First, make a request to set the CSRF token
-      await axios.get('http://localhost:8000/sanctum/csrf-cookie');
-  
-      // Now, send the video upload request
-      const formData = new FormData();
-      formData.append('video', files[0].file);
-  
-      const response = await axios.post('http://localhost:8000/api/upload-video', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // If using authentication
-        },
-      });
-  
-      if (response.status === 200) {
-        setIsUploaded(true);
-        const videoData = response.data.video;
-        console.log('Uploaded Video Metadata:', videoData);
-        alert(`Video Uploaded: ${videoData.name}\nSize: ${(videoData.size / (1024 * 1024)).toFixed(2)} MB`);
-      }
-    } catch (error) {
-      console.error('Upload failed:', error.response?.data || error.message);
-      alert('Upload failed!');
-    }
-  };
 
   return (
     <div
@@ -90,7 +60,7 @@ const FileUploader = ({
                   </span>
                   <div className="h-px bg-gray-300 w-8"></div>
                 </div>
-                <Button onClick={handleUpload} >Upload Video</Button>
+                <Button>Upload Video</Button>
               </>
             )}
           </>
