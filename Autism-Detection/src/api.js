@@ -29,4 +29,45 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-export default api;
+const apiMethods = {
+  // المستخدمون
+  getUsers() {
+    return api.get('/users');
+  },
+  updateUserRole(id, role) {
+    return api.put(`/users/${id}/role`, { role });
+  },
+  deleteUser(id) {
+    return api.delete(`/users/${id}`);
+  },
+
+  // الفئات
+  getCategories() {
+    return api.get('/categories');
+  },
+  createCategory(data) {
+    return api.post('/categories', data);
+  },
+  updateCategory(id, data) {
+    return api.put(`/categories/${id}`, data);
+  },
+  deleteCategory(id) {
+    return api.delete(`/categories/${id}`);
+  },
+
+  // الأنشطة
+  getActivities() {
+    return api.get('/activities');
+  },
+  createActivity(data) {
+    return api.post('/activities', data);
+  },
+  updateActivity(id, data) {
+    return api.put(`/activities/${id}`, data);
+  },
+  deleteActivity(id) {
+    return api.delete(`/activities/${id}`);
+  },
+};
+
+export default apiMethods;

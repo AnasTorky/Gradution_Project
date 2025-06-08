@@ -15,3 +15,4 @@ export async function generateBotResponse(history) {
   if (!response.ok) throw new Error("API error");
   return response.json();
 }
+
