@@ -8,42 +8,50 @@ import { useState } from "react";
 import UploadVideo from "./pages/UploadVideo";
 import Activities from "./pages/Activities";
 import ChatBot from "./components/chatbot/Chatbot";
+import Header from "./layouts/Header";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
-  const [showSignIn, setShowSignIn] = useState(false);
-
-  function handleShowSignIn(e) {
-    e.preventDefault();
-    setShowSignIn(true);
-  }
-  function handleCloseSignIn(e) {
-    e.preventDefault();
-    setShowSignIn(false);
-  }
-  // const handleShowSignIn = () => setShowSignIn(true);
-  return (
-    <div className="App">
-      <ChatBot />
-      <Routes>
-        <Route path="/" element={<Home onShowSignIn={handleShowSignIn} />} />
-        <Route
-          path="/AboutUs"
-          element={<AboutUs onShowSignIn={handleShowSignIn} />}
-        />
-        <Route
-          path="/ContactUs"
-          element={<ContactUs onShowSignIn={handleShowSignIn} />}
-        />
-        <Route path="/Activities" element={<Activities />} />
-        <Route
-          path="/UploadVideo"
-          element={<UploadVideo onShowSignIn={handleShowSignIn} />}
-        />
-      </Routes>
-      {showSignIn && <SignIn onCloseSignIn={handleCloseSignIn} />}
-      {/* <Profile onShowSignIn={handleShowSignIn}/> */}
-    </div>
-  );
+    const [showSignIn, setShowSignIn] = useState(false);
+    function handleShowSignIn(e) {
+        e?.preventDefault();
+        setShowSignIn(true);
+    }
+    function handleCloseSignIn(e) {
+        e?.preventDefault();
+        setShowSignIn(false);
+    }
+    return (
+        <AuthProvider>
+            <div className="App">
+                <Header onShowSignIn={handleShowSignIn} />
+                <ChatBot />
+                <Routes>
+                    <Route
+                        path="/"
+                        element={<Home onShowSignIn={handleShowSignIn} />}
+                    />
+                    <Route
+                        path="/AboutUs"
+                        element={<AboutUs onShowSignIn={handleShowSignIn} />}
+                    />
+                    <Route
+                        path="/ContactUs"
+                        element={<ContactUs onShowSignIn={handleShowSignIn} />}
+                    />
+                    <Route path="/Activities" element={<Activities />} />
+                    <Route
+                        path="/UploadVideo"
+                        element={
+                            <UploadVideo onShowSignIn={handleShowSignIn} />
+                        }
+                    />
+                    <Route path="/Profile" element={<Profile />} />
+                </Routes>
+                {showSignIn && <SignIn onCloseSignIn={handleCloseSignIn} />}
+            </div>
+        </AuthProvider>
+    );
 }
 
 export default App;

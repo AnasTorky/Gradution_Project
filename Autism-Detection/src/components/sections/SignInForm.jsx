@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import { useContext, useState } from "react";
 import LoginHeader from "../common/LoginHeader";
 import InputForm from "../common/InputForm";
 import Button from "../common/Button";
 import SignUpInToggleBtn from "../common/SignUpInToggleBtn";
-import api from "../../api"; // استيراد api
+import { AuthContext } from "../../contexts/AuthContext";
 
 const inputs = [
-    // تعريف مصفوفة inputs هنا
     {
         name: "email",
         placeholder: "Email",
@@ -27,9 +26,11 @@ function SignInForm({
     handleChange,
     formData,
     setFormData,
+    onCloseSignIn,
 }) {
-    const [error, setError] = useState(null);
+    const { login } = useContext(AuthContext);
 
+    const [error, setError] = useState(null);
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -65,8 +66,9 @@ function SignInForm({
             }
 
             const data = await response.json();
-            localStorage.setItem("token", data.token);
+            login(data.token);
             window.location.reload();
+            onCloseSignIn();
         } catch (err) {
             console.error("Login error:", err);
             setError("Login failed. Please try again.");

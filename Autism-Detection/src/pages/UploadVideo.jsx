@@ -1,16 +1,15 @@
 import FileUploader from "../components/sections/FileUploader";
 import Button from "../components/common/Button";
-import Header from "../layouts/Header";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import H2 from "../components/common/H2";
 
-function UploadVideo({ onShowSignIn }) {
+function UploadVideo() {
     const [isUploading, setIsUploading] = useState(false);
     const [files, setFiles] = useState([]);
     const [isUploaded, setIsUploaded] = useState(false);
     const [description, setDescription] = useState("");
-    const [videoResult,setVideoResult]=useState(null);
+    const [videoResult, setVideoResult] = useState(null);
     function handleFilesSelected(files) {
         console.log("Selected files:", files);
     }
@@ -51,7 +50,7 @@ function UploadVideo({ onShowSignIn }) {
                 setIsUploaded(true);
                 const videoData = response.data;
                 console.log("Uploaded Video Metadata:", videoData);
-                setVideoResult(videoData)
+                setVideoResult(videoData);
             }
             console.log(videoResult);
         } catch (error) {
@@ -75,9 +74,6 @@ function UploadVideo({ onShowSignIn }) {
 
     return (
         <div className="pt-24 bg-[var(--primary)] font-nunito min-h-screen">
-            <section className="w-[1350px] mx-auto">
-                <Header onShowSignIn={onShowSignIn} />
-            </section>
             <div className="font-nunito w-full bg-[var(--fifth)] flex justify-center items-center">
                 <div className="w-[80%] h-svh pt-9 pb-15">
                     {isUploaded ? (
@@ -94,38 +90,62 @@ function UploadVideo({ onShowSignIn }) {
                                 the result
                             </h3>
                             {videoResult && (
-    <div>
-        <p>Video uploaded successfully. Here is the result of the AI prediction:</p>
+                                <div>
+                                    <p>
+                                        Video uploaded successfully. Here is the
+                                        result of the AI prediction:
+                                    </p>
 
-        <p><strong>Result:</strong> {videoResult.result_prediction ?? 'N/A'}</p>
-        <p><strong>Class:</strong> {videoResult.class_prediction ?? 'Normal'}</p>
-        <p><strong>Severity:</strong> {videoResult.severity && 'Normal'}</p>
+                                    <p>
+                                        <strong>Result:</strong>{" "}
+                                        {videoResult.result_prediction ?? "N/A"}
+                                    </p>
+                                    <p>
+                                        <strong>Class:</strong>{" "}
+                                        {videoResult.class_prediction ??
+                                            "Normal"}
+                                    </p>
+                                    <p>
+                                        <strong>Severity:</strong>{" "}
+                                        {videoResult.severity && "Normal"}
+                                    </p>
 
-        <p><strong>Face Analysis:</strong>
-            {videoResult.face_analysis ? (
-                <>
-                    Eye Score: {videoResult.face_analysis.eye_score ?? 'Normal'},
-                    Emotion Score: {videoResult.face_analysis.emotion_score ?? 'Normal'}
-                </>
-            ) : (
-                ' Normal'
-            )}
-        </p>
+                                    <p>
+                                        <strong>Face Analysis:</strong>
+                                        {videoResult.face_analysis ? (
+                                            <>
+                                                Eye Score:{" "}
+                                                {videoResult.face_analysis
+                                                    .eye_score ?? "Normal"}
+                                                , Emotion Score:{" "}
+                                                {videoResult.face_analysis
+                                                    .emotion_score ?? "Normal"}
+                                            </>
+                                        ) : (
+                                            " Normal"
+                                        )}
+                                    </p>
 
-        <p><strong>Movement Analysis:</strong>
-            {videoResult.movement_analysis ? (
-                <>
-                    Repetitive Score: {videoResult.movement_analysis.repetitive_score ?? 'Normal'}
-                </>
-            ) : (
-                ' Normal'
-            )}
-        </p>
+                                    <p>
+                                        <strong>Movement Analysis:</strong>
+                                        {videoResult.movement_analysis ? (
+                                            <>
+                                                Repetitive Score:{" "}
+                                                {videoResult.movement_analysis
+                                                    .repetitive_score ??
+                                                    "Normal"}
+                                            </>
+                                        ) : (
+                                            " Normal"
+                                        )}
+                                    </p>
 
-        <p><strong>Combined Score:</strong> {videoResult.combined_score ?? 'Normal'}</p>
-    </div>
-)}
-
+                                    <p>
+                                        <strong>Combined Score:</strong>{" "}
+                                        {videoResult.combined_score ?? "Normal"}
+                                    </p>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>

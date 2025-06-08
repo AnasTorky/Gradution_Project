@@ -1,7 +1,19 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import heroImage from "../../assets/Images/Home/hero.jpeg";
 import Button from "../common/Button";
-function HeroSection() {
+import { AuthContext } from "../../contexts/AuthContext";
+
+import { useContext } from "react";
+
+function HeroSection({ onShowSignIn }) {
+    const { isAuthenticated } = useContext(AuthContext);
+    const navigate = useNavigate();
+    function handleUploadBtn(e, _children) {
+        e.preventDefault();
+        if (isAuthenticated) navigate("/UploadVideo");
+        else onShowSignIn(e);
+    }
+
     return (
         <div className="hero-container  flex items-center justify-between py-6">
             <div className="">
@@ -15,9 +27,7 @@ function HeroSection() {
                         their behavior and recommending personalized activities
                         to enhance their development
                     </p>
-                    <Link to="/UploadVideo">
-                        <Button>Upload a Video +</Button>
-                    </Link>
+                    <Button onClick={handleUploadBtn}>Upload a Video +</Button>
                 </div>
             </div>
             <div className=" h-[704px] w-[704px]  overflow-hidden">
