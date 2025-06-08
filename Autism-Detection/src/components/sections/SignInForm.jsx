@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import { useContext, useState } from "react";
 import LoginHeader from "../common/LoginHeader";
 import InputForm from "../common/InputForm";
 import Button from "../common/Button";
 import SignUpInToggleBtn from "../common/SignUpInToggleBtn";
-import api from "../../api"; // استيراد api
+import { AuthContext } from "../../contexts/AuthContext";
 
 const inputs = [
-    // تعريف مصفوفة inputs هنا
     {
         name: "email",
         placeholder: "Email",
@@ -27,9 +26,11 @@ function SignInForm({
     handleChange,
     formData,
     setFormData,
+    onCloseSignIn,
 }) {
-    const [error, setError] = useState(null);
+    const { login } = useContext(AuthContext);
 
+    const [error, setError] = useState(null);
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -54,7 +55,7 @@ function SignInForm({
                     password: formData.password,
                 }),
             });
-
+            console.log(response);
             if (response.status === 401) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || "Invalid credentials");
@@ -65,11 +66,12 @@ function SignInForm({
             }
 
             const data = await response.json();
-            localStorage.setItem("token", data.token);
-            window.location.reload();
+            // window.location.reload();
+            login(data.token);
+            onCloseSignIn(e);
         } catch (err) {
             console.error("Login error:", err);
-            setError("Login failed. Please try again.");
+            setError("Login failed. Please try again");
         }
     };
 

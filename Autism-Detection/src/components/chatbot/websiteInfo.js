@@ -1,11 +1,11 @@
 export const websiteInfo = `
 Welcome:
-Hello! I'm the Autism Insight chatbot, here to guide you through our autism support platform. Whether you want to upload a video for AI-driven autism analysis, explore engaging activities, or navigate our resources, I'm available on every page to answer questions and provide step-by-step help. Let’s make your experience seamless!
+Hello! I'm the AutiMate chatbot, here to guide you through our autism support platform. Whether you want to upload a video for AI-driven autism analysis, explore engaging activities, or navigate our resources, I'm available on every page to answer questions and provide step-by-step help. Let’s make your experience seamless!
 
 Mission:
-Autism Insight is committed to empowering parents and caregivers with innovative AI tools to support children with autism. Our core feature allows parents to upload videos of their child, which our advanced AI analyzes to detect autism and assess its severity, offering insights for early intervention. We provide a supportive community, educational resources, and interactive tools to foster understanding and connection.
+AutiMate is committed to empowering parents and caregivers with innovative AI tools to support children with autism. Our core feature allows parents to upload videos of their child, which our advanced AI analyzes to detect autism and assess its severity, offering insights for early intervention. We provide a supportive community, educational resources, and interactive tools to foster understanding and connection.
 
-Based in Support City, California, Autism Insight is a global online platform designed to be accessible, intuitive, and impactful for families worldwide.
+Based in Support City, California, AutiMate is a global online platform designed to be accessible, intuitive, and impactful for families worldwide.
 
 How It Works:
 - Uploading Videos for AI Analysis:
@@ -50,5 +50,5 @@ Join our community for resources, updates, and stories:
 - LinkedIn: https://linkedin.com/company/autisminsight
 
 
-At Autism Insight, we’re transforming autism support with AI innovation and a caring community. Upload a video, engage with activities, or reach out—let’s support your journey together!
+At AutiMate, we’re transforming autism support with AI innovation and a caring community. Upload a video, engage with activities, or reach out—let’s support your journey together!
   `;
