@@ -8,25 +8,22 @@ import { useState } from "react";
 import UploadVideo from "./pages/UploadVideo";
 import Activities from "./pages/Activities";
 import ChatBot from "./components/chatbot/Chatbot";
-import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./layouts/Header";
-
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
-  const [showSignIn, setShowSignIn] = useState(false);
-
-  function handleShowSignIn(e) {
-    e.preventDefault();
-    setShowSignIn(true);
-  }
-  function handleCloseSignIn(e) {
-    e.preventDefault();
-    setShowSignIn(false);
-  }
-  // const handleShowSignIn = () => setShowSignIn(true);
-  return (
-    <AuthProvider>
-    <div className="App">
+    const [showSignIn, setShowSignIn] = useState(false);
+    function handleShowSignIn(e) {
+        e?.preventDefault();
+        setShowSignIn(true);
+    }
+    function handleCloseSignIn(e) {
+        e?.preventDefault();
+        setShowSignIn(false);
+    }
+    return (
+        <AuthProvider>
+            <div className="App">
                 <Header onShowSignIn={handleShowSignIn} />
                 <ChatBot />
                 <Routes>
@@ -53,8 +50,8 @@ function App() {
                 </Routes>
                 {showSignIn && <SignIn onCloseSignIn={handleCloseSignIn} />}
             </div>
-    </AuthProvider>
-  );
+        </AuthProvider>
+    );
 }
 
 export default App;
