@@ -6,27 +6,26 @@ use Illuminate\Support\Facades\Auth;
 
 class ChildController extends Controller
 {
+   
+
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'age' => 'required|integer|min:1',
-            'skill' => 'nullable|string|max:255',
-            'preferred_activities' => 'nullable|string|max:255',
+            'name' => 'required|string',
+            'age' => 'required|integer',
+            'skill' => 'nullable|string',
+            'preferred_activities' => 'nullable|string',
         ]);
     
         $child = Child::create([
+            'user_id' => Auth::id(), // This is critical
             'name' => $request->name,
             'age' => $request->age,
             'skill' => $request->skill,
             'preferred_activities' => $request->preferred_activities,
-            'user_id' => Auth::id(),
         ]);
     
-        return response()->json([
-            'child' => $child,
-            'message' => 'Child created successfully',
-        ], 201);
+        return response()->json($child, 201);
     }
     
 

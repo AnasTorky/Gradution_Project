@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/children', [ChildController::class, 'store']);
     Route::put('/children/{child}', [ChildController::class, 'update']);
+  
     Route::delete('/children/{child}', [ChildController::class, 'destroy']);
     Route::get('/activities', [ActivityController::class, 'index']);
     Route::get('/activities/{id}', [ActivityController::class, 'show']);

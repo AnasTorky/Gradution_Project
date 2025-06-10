@@ -65,25 +65,30 @@ function SignUpForm({
                 });
 
                 // 2. Register the user
-                const registerResponse = await fetch(
-                    "http://localhost:8000/api/register",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-Requested-With": "XMLHttpRequest",
-                        },
-                        credentials: "include",
-                        body: JSON.stringify({
-                            name: formData.fullname,
-                            email: formData.email,
-                            password: formData.password,
-                            password_confirmation: formData.confirmPassword,
-                        }),
-                    }
-                );
+                const registerResponse = await fetch("http://localhost:8000/api/register", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-Requested-With": "XMLHttpRequest",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                      name: formData.fullname,
+                      email: formData.email,
+                      password: formData.password,
+                      password_confirmation: formData.confirmPassword,
+                    }),
+                  });
+                  
+                  const registerData = await registerResponse.json();
+                  
+                  if (!registerResponse.ok) {
+                    console.error("Register error:", registerData);
+                    alert("Register failed: " + JSON.stringify(registerData.errors));
+                    return;
+                  }
 
-                const registerData = await registerResponse.json();
+                
 
                 // 3. Store token
                 localStorage.setItem("token", registerData.token);
@@ -111,9 +116,16 @@ function SignUpForm({
                 const childData = await childResponse.json();
 
                 console.log("Child saved:", childData);
+                if (!childResponse.ok) {
+                    const error = await childResponse.json();
+                    console.error("Child creation failed:", error);
+                    alert("Child creation error: " + JSON.stringify(error.message));
+                    return;
+                  }
+                  
 
                 // 5. Optional: Navigate or reload
-                //window.location.reload();
+                window.location.reload();
             } catch (error) {
                 console.error("Registration or child creation error:", error);
             }
