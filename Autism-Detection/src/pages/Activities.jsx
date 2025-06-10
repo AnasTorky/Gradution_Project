@@ -1,76 +1,66 @@
-import GameModal from "../components/common/GameModal";
-import GamesContainer from "../components/common/GamesContainer";
+import { useContext, useState } from "react";
 import Sidebar from "../components/common/SideBar";
+import GamesContainer from "../components/common/GamesContainer";
+import GameModal from "../components/common/GameModal";
 import Game from "../components/common/Game";
-import chessOnlineImg from "../assets/Images/Activities/Games/Chess.jpg";
-import ticToeImg from "../assets/Images/Activities/Games/TicToe.jpeg";
-import gtaImg from "../assets/Images/Activities/Games/gta.jpg";
-import { useState } from "react";
 import Button from "../components/common/Button";
+import { AuthContext } from "../contexts/AuthContext";
 
-const games = [
-    {
-        id: 1,
-        title: "Chess Online",
-        desc: "Play chess Online or Offline",
-        imgUrl: chessOnlineImg,
-        url: "https://html5.gamedistribution.com/b80ebde6ee1b4adfaa96398a4261db80/?gd_sdk_referrer_url=https://www.example.com/games/chess-online",
-    },
-    {
-        id: 2,
-        title: "Tic Toe",
-        desc: "Classic X and O game",
-        imgUrl: ticToeImg,
-        url: "https://html5.gamedistribution.com/28ca14de47374a79adfb2a64460f6219/?gd_sdk_referrer_url=https://www.example.com/games/tic-toe}",
-    },
-    {
-        id: 3,
-        title: "GTA: Grand Vegas Crime",
-        desc: "Play real world GTA game",
-        imgUrl: gtaImg,
-        url: "https://html5.gamedistribution.com/828864726be944c2bff67fa68d505e96/?gd_sdk_referrer_url=https://gamedistribution.com/games/gta:-grand-vegas-crime/",
-    },
-];
+function Activities({ items, containerTitle, containerDesc, onShowSignIn }) {
+    const { isAuthenticated } = useContext(AuthContext);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const itemsExists = items && items.length > 0;
+    function handleItemClick(itemId) {
+        if (!items) return;
+        if (isAuthenticated) {
+            const item = items.find((i) => i.id === itemId);
+            setSelectedItem(item);
+            setIsModalOpen(true);
+        } else onShowSignIn();
+    }
 
-function Activities() {
-    const [selectedGame, setSelectedGame] = useState(null);
-    const [isGameOpen, setIsGameOpen] = useState(false);
-    function handleGameClick(gameId) {
-        const game = games.find((g) => g.id === gameId);
-        setSelectedGame(game);
-        setIsGameOpen(true);
+    function handleModalClose() {
+        setIsModalOpen(false);
     }
-    function handleGameClose() {
-        setIsGameOpen(false);
-    }
+
     return (
         <div className="flex pt-24 relative font-nunito min-h-screen">
-            <Sidebar />
-            {isGameOpen ? (
+            <Sidebar
+                selectedItem={selectedItem}
+                setSelectedItem={setSelectedItem}
+            />
+            {isModalOpen ? (
                 <GameModal
-                    onCloseGame={handleGameClose}
-                    selectedGame={selectedGame}
+                    onCloseGame={handleModalClose}
+                    selectedGame={selectedItem}
                 />
-            ) : (
-                <GamesContainer>
-                    {games.map((game, index) => (
+            ) : itemsExists ? (
+                <GamesContainer
+                    title={containerTitle}
+                    description={containerDesc}
+                >
+                    {items.map((item) => (
                         <Game
-                            img={game.imgUrl}
-                            desc={game.desc}
-                            title={game.title}
-                            key={index}
+                            img={item.imgUrl}
+                            desc={item.desc}
+                            title={item.title}
+                            key={item.id}
                         >
                             <Button
                                 padding="px-8"
-                                onClick={() => handleGameClick(index + 1)}
+                                onClick={() => handleItemClick(item.id)}
                             >
                                 Play
                             </Button>
                         </Game>
                     ))}
                 </GamesContainer>
+            ) : (
+                <div className="w-[80%]"></div>
             )}
         </div>
     );
 }
+
 export default Activities;

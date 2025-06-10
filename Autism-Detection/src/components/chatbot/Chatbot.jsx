@@ -3,7 +3,7 @@ import ChatForm from "./ChatForm";
 import { useEffect, useRef, useState } from "react"; // Add useRef
 import ChatMessage from "./ChatMessage";
 import { TbMessageChatbotFilled } from "react-icons/tb";
-import { websiteInfo } from "./websiteInfo";
+import { websiteInfo } from "../../data/websiteInfo";
 
 function ChatBot() {
     const bottomRef = useRef(null);
