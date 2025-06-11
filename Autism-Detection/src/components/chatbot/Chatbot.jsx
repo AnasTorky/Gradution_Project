@@ -11,53 +11,59 @@ function ChatBot() {
     const [showChatbot, setShowChatbot] = useState(false);
 
     const generateBotResponse = async (history) => {
-        const historyWithContext = [
+       const historyWithContext = [
             {
                 role: "user",
-                parts: [
-                    {
-                        text: `Use this background info for context, if he asked for somthing outside this answer from your info, but don't show it unless asked:\n${websiteInfo}`,
-                    },
-                ],
+                content: `Use this background info for context, if he asked for something outside this answer from your info, but don't show it unless asked:\n${websiteInfo}`
             },
             ...history.map(({ role, text }) => ({
                 role,
-                parts: [{ text }],
-            })),
+                content: text
+            }))
         ];
+
         const requestOptions = {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: historyWithContext }),
-        };
-        try {
-            const response = await fetch(
-                process.env.REACT_APP_GEMINI_API_URL,
-                requestOptions
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+        model: "gpt-3.5-turbo", // أو gpt-4o لو عايز
+        messages: historyWithContext
+    }),
+};
+
+try {
+    const response = await fetch(
+        process.env.REACT_APP_OPENAI_API_URL,
+        requestOptions
+    );
+    const data = await response.json();
+    console.log("GPT Response:", data);
+    if (!response.ok)
+        throw new Error(data.error?.message || "Something went wrong!");
+
+    const text = data.choices?.[0]?.message?.content?.trim();
+
+    if (text) {
+        setChatHistory((prev) => {
+            const updated = [...prev];
+            const thinkingIndex = updated.findIndex(
+                (msg) => msg.text === "Thinking..."
             );
-            const data = await response.json();
-            if (!response.ok)
-                throw new Error(data.error.message || "Something went wrong!");
-            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
-                .replace(/\*\*(.*?)\*\*/g, "$1")
-                .trim();
-            if (text) {
-                setChatHistory((prev) => {
-                    const updated = [...prev];
-                    const thinkingIndex = updated.findIndex(
-                        (msg) => msg.text === "Thinking..."
-                    );
-                    if (thinkingIndex !== -1) {
-                        updated[thinkingIndex] = { role: "model", text }; // Replace the placeholder
-                    } else {
-                        updated.push({ role: "model", text });
-                    }
-                    return updated;
-                });
+            if (thinkingIndex !== -1) {
+                updated[thinkingIndex] = { role: "model", text };
+            } else {
+                updated.push({ role: "model", text });
             }
-        } catch (error) {
-            console.log(error);
-        }
+            return updated;
+        });
+    }
+} catch (error) {
+    console.error(error);
+}
+
     };
 
     function handleShowChatbot() {

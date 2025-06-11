@@ -23,7 +23,7 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <div className="sidebar">
         <div className="admin-links">
-          <h3>Admin Panel</h3>
+          <Link to="/dashboard" pageName="Home">Admin Panel</Link>
           <Link
             to="/dashboard/users"
             className={`admin-link ${activeTab === 'users' ? 'active' : ''}`}
@@ -45,6 +45,7 @@ const Dashboard = () => {
           >
             Manage Activities
           </Link>
+          <Link to="/" pageName="Home">Website</Link>
         </div>
       </div>
 

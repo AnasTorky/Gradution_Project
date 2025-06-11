@@ -12,6 +12,16 @@ import ChatBot from "./components/chatbot/Chatbot";
 import Header from "./layouts/Header";
 import { games } from "./data/games";
 import { videos } from "./data/videos";
+
+
+import AdminDashboard from "./components/Dashboard/Dashboard";
+import UsersManagement from "./components/Dashboard/Users/UsersManagement";
+import EditRole from "./components/Dashboard/Users/EditRole";
+import CategoriesManagement from "./components/Dashboard/Categories/CategoriesManagement";
+import EditCategory from "./components/Dashboard/Categories/EditCategory";
+import ActivitiesManagement from "./components/Dashboard/Activities/ActivitiesManagement";
+import EditActivity from "./components/Dashboard/Activities/EditActivity";
+
 function App() {
     const [showSignIn, setShowSignIn] = useState(false);
     function handleShowSignIn(e) {
@@ -25,7 +35,7 @@ function App() {
     return (
         <AuthProvider>
             <div className="App">
-                <Header onShowSignIn={handleShowSignIn} />
+                    <Header onShowSignIn={handleShowSignIn} />
                 <ChatBot />
                 <Routes>
                     <Route
@@ -84,10 +94,23 @@ function App() {
                             />
                         }
                     />
+                    <Route path="/dashboard" element={<AdminDashboard />}>
+                        <Route path="users" element={<UsersManagement />} />
+                        <Route path="users/edit/:id" element={<EditRole />} />
+
+                        <Route path="categories" element={<CategoriesManagement />} />
+                        <Route path="categories/edit/:id" element={<EditCategory />} />
+                        <Route path="categories/create" element={<EditCategory />} />
+
+                        <Route path="activities" element={<ActivitiesManagement />} />
+                        <Route path="activities/edit/:id" element={<EditActivity />} />
+                        <Route path="activities/create" element={<EditActivity />} />
+                    </Route>
                 </Routes>
                 {showSignIn && <SignIn onCloseSignIn={handleCloseSignIn} />}
             </div>
         </AuthProvider>
+
     );
 }
 

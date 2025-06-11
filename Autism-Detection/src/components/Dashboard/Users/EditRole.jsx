@@ -18,12 +18,13 @@ const EditRole = () => {
           setUser(userData);
           setRole(userData.role);
         }
-        setLoading(false);
       } catch (error) {
-        console.error('Error fetching user:', error);
+        console.error('Failed to fetch user:', error);
+      } finally {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, [id]);
 
@@ -33,11 +34,11 @@ const EditRole = () => {
       await API.updateUserRole(id, role);
       navigate('/dashboard/users');
     } catch (error) {
-      console.error('Error updating role:', error);
+      console.error('Failed to update role:', error);
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Loading user data...</div>;
   if (!user) return <div>User not found</div>;
 
   return (

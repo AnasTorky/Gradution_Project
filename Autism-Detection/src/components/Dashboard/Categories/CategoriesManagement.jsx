@@ -7,19 +7,19 @@ const CategoriesManagement = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await API.getCategories();
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchCategories();
   }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await API.getCategories();
-      setCategories(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setLoading(false);
-    }
-  };
 
   const deleteCategory = async (id) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
@@ -27,12 +27,12 @@ const CategoriesManagement = () => {
         await API.deleteCategory(id);
         setCategories(categories.filter(cat => cat.id !== id));
       } catch (error) {
-        console.error('Error deleting category:', error);
+        console.error('Failed to delete category:', error);
       }
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>Loading categories...</div>;
 
   return (
     <div className="categories-management">

@@ -5,7 +5,6 @@ import API from '../../../api';
 const UsersManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchUsers();
   }, []);

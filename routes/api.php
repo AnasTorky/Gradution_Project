@@ -19,7 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/children', [ChildController::class, 'store']);
     Route::put('/children/{child}', [ChildController::class, 'update']);
-  
+
     Route::delete('/children/{child}', [ChildController::class, 'destroy']);
     Route::get('/activities', [ActivityController::class, 'index']);
     Route::get('/activities/{id}', [ActivityController::class, 'show']);
@@ -29,16 +29,16 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', \App\Http\Middleware\Admin::class])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
-    Route::get('/admin/users', [AdminController::class, 'users']);
-    Route::delete('/admin/users/{user}', [AdminController::class, 'destroy_user']);
-    Route::put('/admin/users/{id}/role', [AdminController::class, 'updateRole']);
-    Route::get('/admin/activities', [AdminController::class, 'activities']);
-    Route::post('/admin/activities', [ActivityController::class, 'store']);
-    Route::put('/admin/activities/{id}', [ActivityController::class, 'update']);
-    Route::delete('/admin/activities/{id}', [ActivityController::class, 'destroy']);
-    Route::get('/admin/categories', [AdminController::class, 'categories']);
-    Route::post('/admin/categories', [CategoryController::class, 'store']);
-    Route::put('/admin/categories/{id}', [CategoryController::class, 'update']);
-    Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy']);
+    Route::get('dashboard', [AdminController::class, 'dashboard']);
+    Route::get('users', [AdminController::class, 'users']);
+    Route::delete('users/{id}', [AdminController::class, 'destroy_user']);
+    Route::put('users/{id}/role', [AdminController::class, 'updateRole']);
+    Route::get('activities', [AdminController::class, 'activities']);
+    Route::post('activities', [ActivityController::class, 'store']);
+    Route::put('activities/{id}', [ActivityController::class, 'update']);
+    Route::delete('activities/{id}', [ActivityController::class, 'destroy']);
+    Route::get('categories', [AdminController::class, 'categories']);
+    Route::post('categories', [CategoryController::class, 'store']);
+    Route::put('categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('categories/{id}', [CategoryController::class, 'destroy']);
 });
