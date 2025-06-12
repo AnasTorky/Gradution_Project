@@ -29,7 +29,8 @@ function Communication() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer put key`,
+                    "Authorization": `Bearer 3r3r3r
+`,
                 },
                 body: JSON.stringify({
                     model: "gpt-3.5-turbo",

@@ -42,7 +42,7 @@ function UploadVideo() {
                             "token"
                         )}`,
                     },
-                    withCredentials: true, // ضروري لـ Sanctum
+                    withCredentials: true,
                 }
             );
             console.log("Full API Response:", response.data);
@@ -79,73 +79,97 @@ function UploadVideo() {
                     {isUploaded ? (
                         <>
                             <div className="mb-[50px]">
-                                <H2 className="text-[40px] font-bold">
-                                    Result
-                                </H2>
-                                <p className="text-[30px] font-medium text-[#333333]">
-                                    we hope the result help you
-                                </p>
+                            <H2 className="text-[40px] font-bold text-green-600">Result</H2>
+                            <p className="text-[30px] font-medium text-gray-700">
+                                We hope the result helps you
+                            </p>
                             </div>
-                            <h3 className="text-[24px] font-bold">
-                                the result
+
+                            <div className="bg-gray-50 p-8 rounded-lg shadow-md">
+                            <h3 className="text-[24px] font-bold mb-6 text-green-600">
+                                Analysis Results
                             </h3>
+
                             {videoResult && (
-                                <div>
-                                    <p>
-                                        Video uploaded successfully. Here is the
-                                        result of the AI prediction:
-                                    </p>
+                                <div className="space-y-6">
 
-                                    <p>
-                                        <strong>Result:</strong>{" "}
+                                <div className="p-4 bg-white rounded border border-gray-200">
+                                    <p className="font-bold text-lg text-green-600">Main Prediction:</p>
+                                    <p className="text-xl">
+                                    <span className="font-semibold text-gray-800">Status:</span>{" "}
+                                    <span className="text-green-600 font-bold">
                                         {videoResult.result_prediction ?? "N/A"}
-                                    </p>
-                                    <p>
-                                        <strong>Class:</strong>{" "}
-                                        {videoResult.class_prediction ??
-                                            "Normal"}
-                                    </p>
-                                    <p>
-                                        <strong>Severity:</strong>{" "}
-                                        {videoResult.severity && "Normal"}
-                                    </p>
-
-                                    <p>
-                                        <strong>Face Analysis:</strong>
-                                        {videoResult.face_analysis ? (
-                                            <>
-                                                Eye Score:{" "}
-                                                {videoResult.face_analysis
-                                                    .eye_score ?? "Normal"}
-                                                , Emotion Score:{" "}
-                                                {videoResult.face_analysis
-                                                    .emotion_score ?? "Normal"}
-                                            </>
-                                        ) : (
-                                            " Normal"
-                                        )}
-                                    </p>
-
-                                    <p>
-                                        <strong>Movement Analysis:</strong>
-                                        {videoResult.movement_analysis ? (
-                                            <>
-                                                Repetitive Score:{" "}
-                                                {videoResult.movement_analysis
-                                                    .repetitive_score ??
-                                                    "Normal"}
-                                            </>
-                                        ) : (
-                                            " Normal"
-                                        )}
-                                    </p>
-
-                                    <p>
-                                        <strong>Combined Score:</strong>{" "}
-                                        {videoResult.combined_score ?? "Normal"}
+                                    </span>
                                     </p>
                                 </div>
+
+
+                                <div className="p-4 bg-white rounded border border-gray-200">
+                                    <p className="font-bold text-lg text-green-600">Classification:</p>
+                                    <p className="text-gray-800">
+                                    <span className="font-semibold">Class:</span>{" "}
+                                    <span className="text-green-600 font-bold">
+                                        {videoResult.class_prediction ?? "Normal"}
+                                    </span>
+                                    </p>
+                                    <p className="text-gray-800">
+                                    <span className="font-semibold">Severity Level:</span>{" "}
+                                    <span className="text-green-600 font-bold">
+                                        {videoResult.severity ?? "Normal"}
+                                    </span>
+                                    </p>
+                                </div>
+
+
+                                <div className="p-4 bg-white rounded border border-gray-200">
+                                    <p className="font-bold text-lg text-green-600">Face Analysis:</p>
+                                    {videoResult.face_analysis ? (
+                                    <>
+                                        <p className="text-gray-800">
+                                        <span className="font-semibold">Eye Score:</span>{" "}
+                                        <span className={videoResult.face_analysis.eye_score ? "text-green-600 font-bold" : "text-gray-800"}>
+                                            {videoResult.face_analysis.eye_score ?? "Normal"}
+                                        </span>
+                                        </p>
+                                        <p className="text-gray-800">
+                                        <span className="font-semibold">Emotion Score:</span>{" "}
+                                        <span className={videoResult.face_analysis.emotion_score ? "text-green-600 font-bold" : "text-gray-800"}>
+                                            {videoResult.face_analysis.emotion_score ?? "Normal"}
+                                        </span>
+                                        </p>
+                                    </>
+                                    ) : (
+                                    <p className="text-gray-800">Normal</p>
+                                    )}
+                                </div>
+
+
+                                <div className="p-4 bg-white rounded border border-gray-200">
+                                    <p className="font-bold text-lg text-green-600">Movement Analysis:</p>
+                                    {videoResult.movement_analysis ? (
+                                    <p className="text-gray-800">
+                                        <span className="font-semibold">Repetitive Score:</span>{" "}
+                                        <span className={videoResult.movement_analysis.repetitive_score ? "text-green-600 font-bold" : "text-gray-800"}>
+                                        {videoResult.movement_analysis.repetitive_score ?? "Normal"}
+                                        </span>
+                                    </p>
+                                    ) : (
+                                    <p className="text-gray-800">Normal</p>
+                                    )}
+                                </div>
+
+                                <div className="p-4 bg-white rounded border border-gray-200">
+                                    <p className="font-bold text-lg text-green-600">Overall Assessment:</p>
+                                    <p className="text-gray-800">
+                                    <span className="font-semibold">Combined Score:</span>{" "}
+                                    <span className="text-green-600 font-bold text-xl">
+                                        {videoResult.combined_score ?? "Normal"}
+                                    </span>
+                                    </p>
+                                </div>
+                                </div>
                             )}
+                            </div>
                         </>
                     ) : (
                         <>
