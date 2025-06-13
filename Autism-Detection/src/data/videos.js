@@ -5,14 +5,14 @@ export const videos = [
     {
         id: 1,
         title: "Learning Together",
-        desc: "Fun Visual Learning&Education For Children",
+        desc: "Fun Visual Learning&Education",
         imgUrl: LearningImg,
         url: "https://www.youtube.com/embed/GIgQ0NNrVvs",
     },
     {
         id: 2,
         title: "Therapy Techniques",
-        desc: "Explore therapy methods for children",
+        desc: "Explore therapy methods",
         imgUrl: TherapyImg,
         url: "https://www.youtube.com/embed/8hyoWgxjnDI",
     },

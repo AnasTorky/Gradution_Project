@@ -7,63 +7,105 @@ function Communication() {
     const [showVisualSupport, setShowVisualSupport] = useState(true);
     const { isAuthenticated } = useContext(AuthContext);
 
+    const detectLanguage = (text) => {
+        const arabicRegex = /[\u0600-\u06FF]/;
+        return arabicRegex.test(text) ? "ar" : "en";
+    };
+
     const handleSpeak = () => {
         if (!isAuthenticated) {
             alert("Please sign in to talk with your AI friend.");
             return;
         }
 
+        window.speechSynthesis.cancel();
+
         const recognition = new window.webkitSpeechRecognition();
-        recognition.lang = "en-US";
+        recognition.lang = "ar-EG"; // نبدأ بالعربية، وسنكتشف لاحقًا اللغة الفعلية
+        recognition.interimResults = true;
         recognition.start();
         setIsListening(true);
-        speak("I'm listening! Go ahead and talk to me.");
+
+        let finalTranscript = "";
+
+        recognition.onresult = (event) => {
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                }
+            }
+        };
+
+        recognition.onerror = (err) => {
+            console.error("Speech recognition error:", err);
+            setIsListening(false);
+            speak("Sorry, I couldn't hear you. Please try again.", "en");
+        };
 
         recognition.onend = () => {
             setIsListening(false);
-        };
 
-        recognition.onresult = async (event) => {
-            const userText = event.results[0][0].transcript;
+            if (!finalTranscript.trim()) {
+                speak("I didn't hear anything. Please try again.", "en");
+                return;
+            }
 
-            const res = await fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer 
-                    
-                    
-                    
-                    `,
-                },
-                body: JSON.stringify({
-                    model: "gpt-3.5-turbo",
-                    messages: [
-                        {
-                            role: "system",
-                            content:
-                                "You are a cheerful, friendly assistant talking to a child. Always respond with clear, positive, and fun speech.",
-                        },
-                        {
-                            role: "user",
-                            content: userText,
-                        },
-                    ],
-                }),
-            });
+            const lang = detectLanguage(finalTranscript);
 
-            const data = await res.json();
-            const reply =
-                data.choices?.[0]?.message?.content ||
-                "Hmm, I didn't catch that. Want to try again?";
-            speak(reply);
+            setTimeout(() => {
+                fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer KEY`,
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4o",
+                        messages: [
+                            {
+                                role: "system",
+                                content:
+                                    lang === "ar"
+                                        ? "أنت مساعد ودود ولطيف تتحدث مع طفل باللغة العربية. اجعل ردودك مرحة، واضحة، ومناسبة للأطفال."
+                                        : "You are a cheerful, friendly assistant talking to a child. Always respond with clear, positive, and fun speech.",
+                            },
+                            {
+                                role: "user",
+                                content: finalTranscript,
+                            },
+                        ],
+                    }),
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        const reply =
+                            data.choices?.[0]?.message?.content ||
+                            (lang === "ar"
+                                ? "ممم، لم أسمع جيدًا. تحب تجرب تاني؟"
+                                : "Hmm, I didn't catch that. Want to try again?");
+                        speak(reply, lang);
+                    })
+                    .catch((error) => {
+                        console.error("API error:", error);
+                        speak(
+                            lang === "ar"
+                                ? "حدث خطأ ما. حاول مرة أخرى لاحقًا."
+                                : "Oops, something went wrong. Please try again later.",
+                            lang
+                        );
+                    });
+            }, 1000);
         };
     };
 
-    const speak = (text) => {
+    const speak = (text, lang) => {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "en-US";
+        utterance.lang = lang === "ar" ? "ar-EG" : "en-US";
         utterance.rate = 0.9;
+        utterance.onerror = (e) => {
+            console.error("SpeechSynthesis error:", e);
+        };
         window.speechSynthesis.speak(utterance);
     };
 
@@ -71,7 +113,6 @@ function Communication() {
         <div className="flex pt-24 relative font-sans min-h-screen bg-[FFFFFF]">
             <Sidebar selectedItem={null} setSelectedItem={() => {}} />
 
-            {/* Floating Visual Support Panel */}
             {showVisualSupport && (
                 <div className="fixed top-28 right-4 bg-white border border-green-200 rounded-xl shadow-xl p-4 w-72 z-50">
                     <h3 className="font-bold text-green-800 text-xl mb-2">🧩 Visual Steps</h3>
@@ -85,18 +126,16 @@ function Communication() {
             )}
 
             <div className="flex flex-col w-full px-6 sm:px-10 md:w-[80%] items-center justify-center text-center">
-            <h2 className="text-4xl sm:text-5xl font-extrabold mb-6 text-[#2E7D32] drop-shadow-md flex items-center gap-3">
-  <img
-    src="https://img.icons8.com/emoji/48/waving-hand-emoji.png"
-    alt="Waving Hand"
-    className="w-12 h-12"
-  />
-  Talk to Your AI Friend
-</h2>
+                <h2 className="text-4xl sm:text-5xl font-extrabold mb-6 text-[#2E7D32] drop-shadow-md flex items-center gap-3">
+                    <img
+                        src="https://img.icons8.com/emoji/48/waving-hand-emoji.png"
+                        alt="Waving Hand"
+                        className="w-12 h-12"
+                    />
+                    Talk to Your AI Friend
+                </h2>
 
-
-                {/* Doctor Avatar with White Background */}
-                <div className=" p-2 rounded-full shadow-lg mb-4">
+                <div className="p-2 rounded-full shadow-lg mb-4">
                     <img
                         src="https://img.icons8.com/color/96/000000/doctor-male.png"
                         alt="Doctor Avatar"
@@ -104,7 +143,7 @@ function Communication() {
                     />
                 </div>
 
-                <p className="text-xl sm:text-2xl text-[000000] mb-6 max-w-xl leading-relaxed">
+                <p className="text-xl sm:text-2xl text-black mb-6 max-w-xl leading-relaxed">
                     Press the button and speak. I’m here to listen and talk with you.
                 </p>
 
@@ -112,12 +151,11 @@ function Communication() {
                     onClick={handleSpeak}
                     className={`${
                         isListening ? "bg-[#AED581]" : "bg-[#C5E1A5] hover:bg-[#AED581]"
-                    } text-[#33691E] text-xl sm:text-2xl px-10 py-4 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
+                    } text-[#33691E] text-xl sm:text-2xl px-10 py-4 rounded-full shadow-lg transition-all duration-3000 ease-in-out`}
                 >
                     🎤 {isListening ? "I'm Listening..." : "Press to Talk"}
                 </button>
 
-                {/* Moved to Bottom */}
                 <div className="mt-8">
                     <label className="flex items-center gap-3 text-lg text-[#2E7D32]">
                         <input
