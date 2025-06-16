@@ -7,11 +7,6 @@ function Communication() {
     const [showVisualSupport, setShowVisualSupport] = useState(true);
     const { isAuthenticated } = useContext(AuthContext);
 
-    const detectLanguage = (text) => {
-        const arabicRegex = /[\u0600-\u06FF]/;
-        return arabicRegex.test(text) ? "ar" : "en";
-    };
-
     const handleSpeak = () => {
         if (!isAuthenticated) {
             alert("Please sign in to talk with your AI friend.");
@@ -21,7 +16,7 @@ function Communication() {
         window.speechSynthesis.cancel();
 
         const recognition = new window.webkitSpeechRecognition();
-        recognition.lang = "ar-EG"; // نبدأ بالعربية، وسنكتشف لاحقًا اللغة الفعلية
+        recognition.lang = "en-US";
         recognition.interimResults = true;
         recognition.start();
         setIsListening(true);
@@ -39,25 +34,24 @@ function Communication() {
         recognition.onerror = (err) => {
             console.error("Speech recognition error:", err);
             setIsListening(false);
-            speak("Sorry, I couldn't hear you. Please try again.", "en");
+            speak("Sorry, I couldn't hear you. Please try again.");
         };
 
         recognition.onend = () => {
             setIsListening(false);
 
             if (!finalTranscript.trim()) {
-                speak("I didn't hear anything. Please try again.", "en");
+                speak("I didn't hear anything. Please try again.");
                 return;
             }
 
-            const lang = detectLanguage(finalTranscript);
-
+            // ⏳ إنتظار 3 ثواني قبل إرسال الرد (كأنه الطفل خلص كلام)
             setTimeout(() => {
                 fetch("https://api.openai.com/v1/chat/completions", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer KEY`,
+                        Authorization: `Bearer `,
                     },
                     body: JSON.stringify({
                         model: "gpt-4o",
@@ -65,9 +59,7 @@ function Communication() {
                             {
                                 role: "system",
                                 content:
-                                    lang === "ar"
-                                        ? "أنت مساعد ودود ولطيف تتحدث مع طفل باللغة العربية. اجعل ردودك مرحة، واضحة، ومناسبة للأطفال."
-                                        : "You are a cheerful, friendly assistant talking to a child. Always respond with clear, positive, and fun speech.",
+                                    "You are a cheerful, friendly assistant talking to a child. Always respond with clear, positive, and fun speech.",
                             },
                             {
                                 role: "user",
@@ -80,28 +72,21 @@ function Communication() {
                     .then((data) => {
                         const reply =
                             data.choices?.[0]?.message?.content ||
-                            (lang === "ar"
-                                ? "ممم، لم أسمع جيدًا. تحب تجرب تاني؟"
-                                : "Hmm, I didn't catch that. Want to try again?");
-                        speak(reply, lang);
+                            "Hmm, I didn't catch that. Want to try again?";
+                        speak(reply);
                     })
                     .catch((error) => {
                         console.error("API error:", error);
-                        speak(
-                            lang === "ar"
-                                ? "حدث خطأ ما. حاول مرة أخرى لاحقًا."
-                                : "Oops, something went wrong. Please try again later.",
-                            lang
-                        );
+                        speak("Oops, something went wrong. Please try again later.");
                     });
-            }, 1000);
+            }, 3000); // 3 ثواني انتظار
         };
     };
 
-    const speak = (text, lang) => {
+    const speak = (text) => {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang === "ar" ? "ar-EG" : "en-US";
+        utterance.lang = "en-US";
         utterance.rate = 0.9;
         utterance.onerror = (e) => {
             console.error("SpeechSynthesis error:", e);
@@ -118,7 +103,7 @@ function Communication() {
                     <h3 className="font-bold text-green-800 text-xl mb-2">🧩 Visual Steps</h3>
                     <ul className="space-y-3 text-[#5D4037] text-sm">
                         <li className="flex items-center gap-2">🎤 <span>Press the mic</span></li>
-                        <li className="flex items-center gap-2">🗣️ <span>Speak clearly</span></li>
+                        <li className="flex items-center gap-2">🗣 <span>Speak clearly</span></li>
                         <li className="flex items-center gap-2">⏳ <span>Wait for a reply</span></li>
                         <li className="flex items-center gap-2">🎧 <span>Listen to the AI</span></li>
                     </ul>
@@ -151,7 +136,7 @@ function Communication() {
                     onClick={handleSpeak}
                     className={`${
                         isListening ? "bg-[#AED581]" : "bg-[#C5E1A5] hover:bg-[#AED581]"
-                    } text-[#33691E] text-xl sm:text-2xl px-10 py-4 rounded-full shadow-lg transition-all duration-3000 ease-in-out`}
+                    } text-[#33691E] text-xl sm:text-2xl px-10 py-4 rounded-full shadow-lg transition-all duration-300 ease-in-out`}
                 >
                     🎤 {isListening ? "I'm Listening..." : "Press to Talk"}
                 </button>

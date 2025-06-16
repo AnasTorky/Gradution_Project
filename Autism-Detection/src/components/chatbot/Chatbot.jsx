@@ -1,6 +1,6 @@
 import { MdKeyboardArrowDown } from "react-icons/md";
 import ChatForm from "./ChatForm";
-import { useEffect, useRef, useState } from "react"; // Add useRef
+import { useEffect, useRef, useState } from "react";
 import ChatMessage from "./ChatMessage";
 import { TbMessageChatbotFilled } from "react-icons/tb";
 import { websiteInfo } from "../../data/websiteInfo";
@@ -11,59 +11,70 @@ function ChatBot() {
     const [showChatbot, setShowChatbot] = useState(false);
 
     const generateBotResponse = async (history) => {
-       const historyWithContext = [
+        const historyWithContext = [
             {
                 role: "user",
                 content: `Use this background info for context, if he asked for something outside this answer from your info, but don't show it unless asked:\n${websiteInfo}`
             },
             ...history.map(({ role, text }) => ({
-                role,
+                role: role === "model" ? "assistant" : role, // ✅ Fix here
                 content: text
             }))
         ];
 
         const requestOptions = {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-        model: "gpt-3.5-turbo", // أو gpt-4o لو عايز
-        messages: historyWithContext
-    }),
-};
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo", // or gpt-4o if available
+                messages: historyWithContext
+            }),
+        };
 
-try {
-    const response = await fetch(
-        process.env.REACT_APP_OPENAI_API_URL,
-        requestOptions
-    );
-    const data = await response.json();
-    console.log("GPT Response:", data);
-    if (!response.ok)
-        throw new Error(data.error?.message || "Something went wrong!");
+        try {
+            console.log("API URL:", process.env.REACT_APP_OPENAI_API_URL);
+            console.log("API KEY exists:", !!process.env.REACT_APP_OPENAI_API_KEY);
 
-    const text = data.choices?.[0]?.message?.content?.trim();
-
-    if (text) {
-        setChatHistory((prev) => {
-            const updated = [...prev];
-            const thinkingIndex = updated.findIndex(
-                (msg) => msg.text === "Thinking..."
+            const response = await fetch(
+                process.env.REACT_APP_OPENAI_API_URL,
+                requestOptions
             );
-            if (thinkingIndex !== -1) {
-                updated[thinkingIndex] = { role: "model", text };
-            } else {
-                updated.push({ role: "model", text });
-            }
-            return updated;
-        });
-    }
-} catch (error) {
-    console.error(error);
-}
 
+            const data = await response.json();
+
+            console.log("GPT Response:", data);
+
+            if (!response.ok) {
+                console.error("API Error:", data);
+                throw new Error(data.error?.message || "Something went wrong!");
+            }
+
+            const text = data.choices?.[0]?.message?.content?.trim();
+
+            if (text) {
+                setChatHistory((prev) => {
+                    const updated = [...prev];
+                    const thinkingIndex = updated.findIndex(
+                        (msg) => msg.text === "Thinking..."
+                    );
+                    if (thinkingIndex !== -1) {
+                        updated[thinkingIndex] = { role: "model", text };
+                    } else {
+                        updated.push({ role: "model", text });
+                    }
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            setChatHistory((prev) => [
+                ...prev,
+                { role: "model", text: "Oops! Something went wrong. Please try again later." }
+            ]);
+        }
     };
 
     function handleShowChatbot() {
