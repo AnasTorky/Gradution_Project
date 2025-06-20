@@ -51,7 +51,7 @@ function Communication() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer `,
+                        Authorization: `Bearer key`,
                     },
                     body: JSON.stringify({
                         model: "gpt-4o",
