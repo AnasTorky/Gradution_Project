@@ -45,7 +45,6 @@ function Communication() {
                 return;
             }
 
-            // ⏳ إنتظار 3 ثواني قبل إرسال الرد (كأنه الطفل خلص كلام)
             setTimeout(() => {
                 fetch("https://api.openai.com/v1/chat/completions", {
                     method: "POST",
@@ -79,7 +78,7 @@ function Communication() {
                         console.error("API error:", error);
                         speak("Oops, something went wrong. Please try again later.");
                     });
-            }, 3000); // 3 ثواني انتظار
+            }, 3000); 
         };
     };
 
