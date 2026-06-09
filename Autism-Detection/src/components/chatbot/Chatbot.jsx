@@ -17,7 +17,7 @@ function ChatBot() {
                 content: `Use this background info for context, if he asked for something outside this answer from your info, but don't show it unless asked:\n${websiteInfo}`
             },
             ...history.map(({ role, text }) => ({
-                role: role === "model" ? "assistant" : role, // ✅ Fix here
+                role: role === "model" ? "assistant" : role, 
                 content: text
             }))
         ];
